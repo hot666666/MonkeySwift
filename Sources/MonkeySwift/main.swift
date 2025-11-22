@@ -1,4 +1,4 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+// MonkeySwift - Monkey Programming Language Interpreter
+// Tree-walking interpreter written in Swift
 
-print("Hello, world!")
+startRepl()
