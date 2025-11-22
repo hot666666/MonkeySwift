@@ -1,5 +1,5 @@
 // MARK: - Environment
-public class Environment {
+public class Environment: @unchecked Sendable {
     private var store: [String: Object] = [:]
     private var outer: Environment?
 

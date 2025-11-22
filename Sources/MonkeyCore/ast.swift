@@ -1,5 +1,5 @@
 // MARK: - Node Protocol
-public protocol Node {
+public protocol Node: Sendable {
     func tokenLiteral() -> String
     func string() -> String
 }
@@ -15,10 +15,10 @@ public protocol Expression: Node {
 }
 
 // MARK: - Program
-public struct Program: Node {
-    public var statements: [Statement]
+public struct Program: Node, Sendable {
+    public var statements: [any Statement]
 
-    public init(statements: [Statement] = []) {
+    public init(statements: [any Statement] = []) {
         self.statements = statements
     }
 
@@ -36,12 +36,12 @@ public struct Program: Node {
 
 // MARK: - Statements
 
-public struct LetStatement: Statement {
+public struct LetStatement: Statement, Sendable {
     public let token: TokenType  // .let
     public let name: Identifier
-    public let value: Expression
+    public let value: any Expression
 
-    public init(token: TokenType, name: Identifier, value: Expression) {
+    public init(token: TokenType, name: Identifier, value: any Expression) {
         self.token = token
         self.name = name
         self.value = value
@@ -58,11 +58,11 @@ public struct LetStatement: Statement {
     }
 }
 
-public struct ReturnStatement: Statement {
+public struct ReturnStatement: Statement, Sendable {
     public let token: TokenType  // .return
-    public let returnValue: Expression
+    public let returnValue: any Expression
 
-    public init(token: TokenType, returnValue: Expression) {
+    public init(token: TokenType, returnValue: any Expression) {
         self.token = token
         self.returnValue = returnValue
     }
@@ -78,11 +78,11 @@ public struct ReturnStatement: Statement {
     }
 }
 
-public struct ExpressionStatement: Statement {
+public struct ExpressionStatement: Statement, Sendable {
     public let token: TokenType  // 표현식의 첫 번째 토큰
-    public let expression: Expression
+    public let expression: any Expression
 
-    public init(token: TokenType, expression: Expression) {
+    public init(token: TokenType, expression: any Expression) {
         self.token = token
         self.expression = expression
     }
@@ -98,11 +98,11 @@ public struct ExpressionStatement: Statement {
     }
 }
 
-public struct BlockStatement: Statement {
+public struct BlockStatement: Statement, Sendable {
     public let token: TokenType  // .leftBrace
-    public var statements: [Statement]
+    public var statements: [any Statement]
 
-    public init(token: TokenType, statements: [Statement] = []) {
+    public init(token: TokenType, statements: [any Statement] = []) {
         self.token = token
         self.statements = statements
     }
@@ -120,7 +120,7 @@ public struct BlockStatement: Statement {
 
 // MARK: - Expressions
 
-public struct Identifier: Expression {
+public struct Identifier: Expression, Sendable {
     public let token: TokenType  // .identifier
     public let value: String
 
@@ -140,7 +140,7 @@ public struct Identifier: Expression {
     }
 }
 
-public struct IntegerLiteral: Expression {
+public struct IntegerLiteral: Expression, Sendable {
     public let token: TokenType  // .int
     public let value: Int
 
@@ -160,7 +160,7 @@ public struct IntegerLiteral: Expression {
     }
 }
 
-public struct BooleanLiteral: Expression {
+public struct BooleanLiteral: Expression, Sendable {
     public let token: TokenType  // .true or .false
     public let value: Bool
 
@@ -180,12 +180,12 @@ public struct BooleanLiteral: Expression {
     }
 }
 
-public struct PrefixExpression: Expression {
+public struct PrefixExpression: Expression, Sendable {
     public let token: TokenType  // prefix operator (!, -)
     public let operator_: String
-    public let right: Expression
+    public let right: any Expression
 
-    public init(token: TokenType, operator_: String, right: Expression) {
+    public init(token: TokenType, operator_: String, right: any Expression) {
         self.token = token
         self.operator_ = operator_
         self.right = right
@@ -202,13 +202,13 @@ public struct PrefixExpression: Expression {
     }
 }
 
-public struct InfixExpression: Expression {
+public struct InfixExpression: Expression, Sendable {
     public let token: TokenType  // operator token (+, -, *, /, <, >, ==, !=)
-    public let left: Expression
+    public let left: any Expression
     public let operator_: String
-    public let right: Expression
+    public let right: any Expression
 
-    public init(token: TokenType, left: Expression, operator_: String, right: Expression) {
+    public init(token: TokenType, left: any Expression, operator_: String, right: any Expression) {
         self.token = token
         self.left = left
         self.operator_ = operator_
@@ -226,13 +226,13 @@ public struct InfixExpression: Expression {
     }
 }
 
-public struct IfExpression: Expression {
+public struct IfExpression: Expression, Sendable {
     public let token: TokenType  // .if
-    public let condition: Expression
+    public let condition: any Expression
     public let consequence: BlockStatement
     public let alternative: BlockStatement?
 
-    public init(token: TokenType, condition: Expression, consequence: BlockStatement, alternative: BlockStatement? = nil) {
+    public init(token: TokenType, condition: any Expression, consequence: BlockStatement, alternative: BlockStatement? = nil) {
         self.token = token
         self.condition = condition
         self.consequence = consequence
@@ -254,7 +254,7 @@ public struct IfExpression: Expression {
     }
 }
 
-public struct FunctionLiteral: Expression {
+public struct FunctionLiteral: Expression, Sendable {
     public let token: TokenType  // .function
     public let parameters: [Identifier]
     public let body: BlockStatement
@@ -277,12 +277,12 @@ public struct FunctionLiteral: Expression {
     }
 }
 
-public struct CallExpression: Expression {
+public struct CallExpression: Expression, Sendable {
     public let token: TokenType  // .leftParen
-    public let function: Expression  // Identifier or FunctionLiteral
-    public let arguments: [Expression]
+    public let function: any Expression  // Identifier or FunctionLiteral
+    public let arguments: [any Expression]
 
-    public init(token: TokenType, function: Expression, arguments: [Expression]) {
+    public init(token: TokenType, function: any Expression, arguments: [any Expression]) {
         self.token = token
         self.function = function
         self.arguments = arguments
