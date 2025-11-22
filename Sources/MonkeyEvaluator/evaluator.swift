@@ -280,7 +280,7 @@ func isError(_ obj: any Object) -> Bool {
     return obj.type() == .error
 }
 
-func objectsEqual(_ left: Object, right: any Object) -> Bool {
+func objectsEqual(_ left: any Object, _ right: any Object) -> Bool {
     if let leftInt = left as? IntegerObject, let rightInt = right as? IntegerObject {
         return leftInt.value == rightInt.value
     }
