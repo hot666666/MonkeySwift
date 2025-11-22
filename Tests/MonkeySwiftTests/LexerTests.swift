@@ -1,7 +1,7 @@
 import Testing
 @testable import MonkeySwift
 
-@Suite("Lexer Test")
+@Suite("LexerTests")
 struct MonkeySwiftLexer {
 	@Test func testLexerTokenization() async throws {
 		let input = """

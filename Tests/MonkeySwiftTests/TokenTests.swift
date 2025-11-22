@@ -1,7 +1,7 @@
 import Testing
 @testable import MonkeySwift
 
-@Suite("Token Test")
+@Suite("TokenTests")
 struct MonkeySwiftToken {
 	@Test func testTokenSymbolCreation() {
 		let token1 = TokenType(symbol: "+")
