@@ -9,9 +9,7 @@ public struct Lexer: Sendable {
 
     public init(input: String) {
         self.input = input
-        var mutableSelf = self
-        mutableSelf.setNextCharacter()
-        self = mutableSelf
+        self.setNextCharacter()
     }
 
     public mutating func nextTokenType() -> TokenType {
