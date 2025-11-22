@@ -89,7 +89,7 @@ public struct Lexer: Sendable {
     }
 
     private mutating func readIdentifier() -> String {
-        return readCharacter(while: isLetter)
+        return readCharacter(while: isLetterOrDigit)
     }
 
     private mutating func readNumber() -> String {
@@ -116,5 +116,9 @@ public struct Lexer: Sendable {
 
     private func isDigit(_ character: Character) -> Bool {
         return ("0"..."9").contains(character)
+    }
+
+    private func isLetterOrDigit(_ character: Character) -> Bool {
+        return isLetter(character) || isDigit(character)
     }
 }
