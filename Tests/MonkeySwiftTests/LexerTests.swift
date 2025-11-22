@@ -1,6 +1,7 @@
 import Testing
 
-@testable import MonkeySwift
+@testable import MonkeyCore
+@testable import MonkeyLexer
 
 @Suite("Lexer tests")
 struct LexerTests {

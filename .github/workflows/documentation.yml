@@ -1,0 +1,63 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-docs:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Swift
+      uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.0"
+
+    - name: Build Documentation
+      run: |
+        swift package --allow-writing-to-directory ./docs \
+          generate-documentation --target MonkeyCore \
+          --disable-indexing \
+          --transform-for-static-hosting \
+          --hosting-base-path MonkeySwift \
+          --output-path ./docs
+
+    - name: Copy Architecture Diagrams
+      run: |
+        mkdir -p ./docs/diagrams
+        cp -r docs/diagrams/* ./docs/diagrams/ || true
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './docs'
+
+  deploy:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
