@@ -2,31 +2,73 @@
 
 **Monkey 프로그래밍 언어의 Swift 구현체**
 
-Tree-walking 인터프리터로 구현된 Monkey 언어 인터프리터입니다. "Writing An Interpreter In Go" 책을 기반으로 Swift로 재구현했습니다.
+Monkey 언어 인터프리터입니다. "Writing An Interpreter In Go" 책을 기반으로 Swift로 재구현했습니다.
 
 ## 목차
 
+- [빌드 및 실행](#빌드-및-실행)
 - [특징](#특징)
 - [아키텍처](#아키텍처)
 - [프로젝트 구조](#프로젝트-구조)
-- [빌드 및 실행](#빌드-및-실행)
 - [언어 기능](#언어-기능)
 - [예시 코드](#예시-코드)
 - [동작 흐름](#동작-흐름)
 - [테스트](#테스트)
 
+## 빌드 및 실행
+
+### 요구사항
+
+- Swift 6.0 이상
+- macOS, Linux, Windows (Swift 지원 플랫폼)
+
+### 빌드
+
+```bash
+# 프로젝트 빌드
+swift build
+
+# Release 모드 빌드
+swift build -c release
+```
+
+### 실행
+
+```bash
+# REPL 모드로 실행
+swift run
+
+# 또는 빌드된 실행 파일로 직접 실행
+.build/debug/MonkeySwift
+```
+
+### REPL 사용법
+
+```bash
+$ swift run
+Hello! This is the Monkey programming language!
+Feel free to type in commands
+>> let x = 5;
+5
+>> let y = 10;
+10
+>> x + y
+15
+>> exit
+Goodbye!
+```
+
 ## 특징
 
-- ✅ **렉싱 (Lexing)**: 소스 코드를 토큰으로 변환
-- ✅ **파싱 (Parsing)**: Pratt Parsing을 사용한 AST 생성
-- ✅ **평가 (Evaluation)**: Tree-walking 방식으로 AST 실행
-- ✅ **일급 함수 (First-class Functions)**: 함수를 값으로 취급
-- ✅ **클로저 (Closures)**: 외부 변수 캡처 지원
-- ✅ **정수 연산**: 사칙연산, 비교 연산
-- ✅ **불린 연산**: 논리 연산자 지원
-- ✅ **조건문**: if-else 표현식
-- ✅ **재귀 함수**: 재귀 호출 지원
-- ✅ **Swift 6.0 호환**: Strict concurrency 준수
+- **렉싱 (Lexing)**: 소스 코드를 토큰으로 변환
+- **파싱 (Parsing)**: Pratt Parsing을 사용한 AST 생성
+- **평가 (Evaluation)**: Tree-walking 방식으로 AST 실행
+- **일급 함수 (First-class Functions)**: 함수를 값으로 취급
+- **클로저 (Closures)**: 외부 변수 캡처 지원
+- **정수 연산**: 사칙연산, 비교 연산
+- **불린 연산**: 논리 연산자 지원
+- **조건문**: if-else 표현식
+- **재귀 함수**: 재귀 호출 지원
 
 ## 아키텍처
 
@@ -116,49 +158,6 @@ MonkeySwift/
         ├── ObjectTests.swift        # Object 테스트
         ├── EvaluatorTests.swift     # Evaluator 테스트
         └── IntegrationTests.swift   # 통합 테스트
-```
-
-## 빌드 및 실행
-
-### 요구사항
-
-- Swift 6.0 이상
-- macOS, Linux, Windows (Swift 지원 플랫폼)
-
-### 빌드
-
-```bash
-# 프로젝트 빌드
-swift build
-
-# Release 모드 빌드
-swift build -c release
-```
-
-### 실행
-
-```bash
-# REPL 모드로 실행
-swift run
-
-# 또는 빌드된 실행 파일로 직접 실행
-.build/debug/MonkeySwift
-```
-
-### REPL 사용법
-
-```bash
-$ swift run
-Hello! This is the Monkey programming language!
-Feel free to type in commands
->> let x = 5;
-5
->> let y = 10;
-10
->> x + y
-15
->> exit
-Goodbye!
 ```
 
 ## 언어 기능
@@ -423,51 +422,6 @@ graph TD
     style Recurse fill:#9b59b6
 ```
 
-## 테스트
-
-### 전체 테스트 실행
-
-```bash
-swift test
-```
-
-### 개별 테스트 실행
-
-```bash
-# Lexer 테스트만 실행
-swift test --filter LexerTests
-
-# Parser 테스트만 실행
-swift test --filter ParserTests
-
-# Evaluator 테스트만 실행
-swift test --filter EvaluatorTests
-```
-
-### 테스트 커버리지
-
-- **TokenTests**: 토큰 타입 및 리터럴 변환
-- **LexerTests**: 어휘 분석 (숫자, 식별자, 연산자, 키워드)
-- **ASTTests**: AST 노드 생성 및 출력
-- **ParserTests**: 구문 분석 (statements, expressions, 연산자 우선순위)
-- **ObjectTests**: 객체 시스템 및 Environment 스코프
-- **EvaluatorTests**: 평가 (연산, 함수, 클로저, 재귀, 에러 처리)
-- **IntegrationTests**: 전체 파이프라인 통합 테스트
-
-### 테스트 통계
-
-```
-✅ Token: 3 tests
-✅ Lexer: 5 tests
-✅ AST: 17 tests
-✅ Parser: 15 tests
-✅ Object: 8 tests
-✅ Evaluator: 12 tests
-✅ Integration: 10 tests
-───────────────────────
-📊 Total: 70+ tests
-```
-
 ## 기술적 세부사항
 
 ### Token
@@ -531,15 +485,3 @@ class Environment {
 - 📖 [Writing An Interpreter In Go](https://interpreterbook.com/) - Thorsten Ball
 - 🦅 [Swift Programming Language](https://swift.org/)
 - 🐵 [Monkey Language Specification](https://monkeylang.org/)
-
-## 라이선스
-
-This project is educational and based on the Monkey language from "Writing An Interpreter In Go".
-
-## 기여
-
-Issue와 Pull Request를 환영합니다!
-
----
-
-**MonkeySwift** - A tree-walking interpreter written in Swift 🐵✨
