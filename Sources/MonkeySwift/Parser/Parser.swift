@@ -33,27 +33,15 @@ enum Precedence: Int, Comparable {
 // MARK: - Parser
 public struct Parser {
     var lexer: Lexer
-    var currentToken: TokenType
-    var peekToken: TokenType
+    var currentToken: TokenType = .eof
+    var peekToken: TokenType = .eof
     public var errors: [String] = []
 
     public init(lexer: Lexer) {
-        var parser = Parser(
-            lexer: lexer,
-            currentToken: .eof,
-            peekToken: .eof,
-            errors: []
-        )
-        parser.nextToken()
-        parser.nextToken()
-        return parser
-    }
-
-    private init(lexer: Lexer, currentToken: TokenType, peekToken: TokenType, errors: [String]) {
-        self.lexer = lexer
-        self.currentToken = currentToken
-        self.peekToken = peekToken
-        self.errors = errors
+				self.lexer = lexer
+			  // currentToken peekToken 할당
+				self.nextToken()
+				self.nextToken()
     }
 
     public mutating func parseProgram() -> Program {
@@ -84,6 +72,8 @@ public struct Parser {
         return peekToken == tokenType
     }
 
+		// 어떤 토큰을 기대했고, 실제로 무엇이 왔는지 에러 메시지로 기록
+		@discardableResult
     private mutating func expectPeek(_ tokenType: TokenType) -> Bool {
         if peekTokenIs(tokenType) {
             nextToken()
@@ -206,6 +196,7 @@ public struct Parser {
 
     // MARK: - Expression Parsing
 
+		// 이전 토큰의 precedence를 가지고 재귀적으로 동작
     private mutating func parseExpression(_ precedence: Precedence) -> (any Expression)? {
         guard var leftExp = parsePrefixExpression() else {
             noPrefixParseFnError(currentToken)
