@@ -11,7 +11,7 @@ public protocol Statement: Node {}
 public protocol Expression: Node {}
 
 // MARK: - Program
-public struct Program: Sendable {
+public struct Program: Node {
     public var statements: [any Statement]
 
     public init(statements: [any Statement] = []) {
