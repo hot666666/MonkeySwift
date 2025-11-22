@@ -28,7 +28,7 @@ public enum TokenKeyword: String {
 }
 
 // MARK: - TokenType
-public enum TokenType: Equatable, Sendable {
+public enum TokenType: Equatable {
     case unknown, illegal, eof
 
     // Identifiers + literals

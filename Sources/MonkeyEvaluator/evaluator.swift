@@ -2,7 +2,7 @@ import MonkeyCore
 
 // MARK: - Evaluator
 
-public func eval(node: any Node, env: Environment) -> any Object {
+public func eval(node: Node, env: Environment) -> Object {
     switch node {
     // Program
     case let program as Program:
@@ -83,7 +83,7 @@ public func eval(node: any Node, env: Environment) -> any Object {
     }
 }
 
-func evalProgram(_ program: Program, env: Environment) -> any Object {
+func evalProgram(_ program: Program, env: Environment) -> Object {
     var result: Object = NULL
 
     for statement in program.statements {
@@ -101,7 +101,7 @@ func evalProgram(_ program: Program, env: Environment) -> any Object {
     return result
 }
 
-func evalBlockStatement(_ block: BlockStatement, env: Environment) -> any Object {
+func evalBlockStatement(_ block: BlockStatement, env: Environment) -> Object {
     var result: Object = NULL
 
     for statement in block.statements {
@@ -115,7 +115,7 @@ func evalBlockStatement(_ block: BlockStatement, env: Environment) -> any Object
     return result
 }
 
-func evalPrefixExpression(operator_: String, right: any Object) -> any Object {
+func evalPrefixExpression(operator_: String, right: Object) -> Object {
     switch operator_ {
     case "!":
         return evalBangOperatorExpression(right)
@@ -126,7 +126,7 @@ func evalPrefixExpression(operator_: String, right: any Object) -> any Object {
     }
 }
 
-func evalBangOperatorExpression(_ right: any Object) -> any Object {
+func evalBangOperatorExpression(_ right: Object) -> Object {
     switch right {
     case is BooleanObject where (right as! BooleanObject).value == true:
         return FALSE
@@ -139,7 +139,7 @@ func evalBangOperatorExpression(_ right: any Object) -> any Object {
     }
 }
 
-func evalMinusPrefixOperatorExpression(_ right: any Object) -> any Object {
+func evalMinusPrefixOperatorExpression(_ right: Object) -> Object {
     guard right.type() == .integer else {
         return ErrorObject(message: "unknown operator: -\(right.type().rawValue)")
     }
@@ -148,7 +148,7 @@ func evalMinusPrefixOperatorExpression(_ right: any Object) -> any Object {
     return IntegerObject(value: -value)
 }
 
-func evalInfixExpression(operator_: String, left: Object, right: any Object) -> any Object {
+func evalInfixExpression(operator_: String, left: Object, right: Object) -> Object {
     if left.type() == .integer && right.type() == .integer {
         return evalIntegerInfixExpression(operator_: operator_, left: left, right: right)
     }
@@ -168,7 +168,7 @@ func evalInfixExpression(operator_: String, left: Object, right: any Object) -> 
     return ErrorObject(message: "unknown operator: \(left.type().rawValue) \(operator_) \(right.type().rawValue)")
 }
 
-func evalIntegerInfixExpression(operator_: String, left: Object, right: any Object) -> any Object {
+func evalIntegerInfixExpression(operator_: String, left: Object, right: Object) -> Object {
     let leftVal = (left as! IntegerObject).value
     let rightVal = (right as! IntegerObject).value
 
@@ -194,7 +194,7 @@ func evalIntegerInfixExpression(operator_: String, left: Object, right: any Obje
     }
 }
 
-func evalIfExpression(_ expr: IfExpression, env: Environment) -> any Object {
+func evalIfExpression(_ expr: IfExpression, env: Environment) -> Object {
     let condition = eval(node: expr.condition, env: env)
 
     if isError(condition) {
@@ -210,7 +210,7 @@ func evalIfExpression(_ expr: IfExpression, env: Environment) -> any Object {
     }
 }
 
-func evalIdentifier(_ node: Identifier, env: Environment) -> any Object {
+func evalIdentifier(_ node: Identifier, env: Environment) -> Object {
     if let val = env.get(node.value) {
         return val
     }
@@ -218,8 +218,8 @@ func evalIdentifier(_ node: Identifier, env: Environment) -> any Object {
     return ErrorObject(message: "identifier not found: \(node.value)")
 }
 
-func evalExpressions(_ exps: [any Expression], env: Environment) -> [any Object] {
-    var result: [any Object] = []
+func evalExpressions(_ exps: [Expression], env: Environment) -> [Object] {
+    var result: [Object] = []
 
     for exp in exps {
         let evaluated = eval(node: exp, env: env)
@@ -232,7 +232,7 @@ func evalExpressions(_ exps: [any Expression], env: Environment) -> [any Object]
     return result
 }
 
-func applyFunction(_ fn: any Object, args: [any Object]) -> any Object {
+func applyFunction(_ fn: Object, args: [Object]) -> Object {
     guard let function = fn as? FunctionObject else {
         return ErrorObject(message: "not a function: \(fn.type().rawValue)")
     }
@@ -242,7 +242,7 @@ func applyFunction(_ fn: any Object, args: [any Object]) -> any Object {
     return unwrapReturnValue(evaluated)
 }
 
-func extendFunctionEnv(_ fn: FunctionObject, args: [any Object]) -> Environment {
+func extendFunctionEnv(_ fn: FunctionObject, args: [Object]) -> Environment {
     let env = Environment(outer: fn.env)
 
     for (paramIdx, param) in fn.parameters.enumerated() {
@@ -252,7 +252,7 @@ func extendFunctionEnv(_ fn: FunctionObject, args: [any Object]) -> Environment 
     return env
 }
 
-func unwrapReturnValue(_ obj: any Object) -> any Object {
+func unwrapReturnValue(_ obj: Object) -> Object {
     if let returnValue = obj as? ReturnValueObject {
         return returnValue.value
     }
@@ -261,7 +261,7 @@ func unwrapReturnValue(_ obj: any Object) -> any Object {
 
 // MARK: - Helper Functions
 
-func isTruthy(_ obj: any Object) -> Bool {
+func isTruthy(_ obj: Object) -> Bool {
     switch obj {
     case is NullObject:
         return false
@@ -276,11 +276,11 @@ func nativeBoolToBooleanObject(_ input: Bool) -> BooleanObject {
     return input ? TRUE : FALSE
 }
 
-func isError(_ obj: any Object) -> Bool {
+func isError(_ obj: Object) -> Bool {
     return obj.type() == .error
 }
 
-func objectsEqual(_ left: any Object, _ right: any Object) -> Bool {
+func objectsEqual(_ left: Object, _ right: Object) -> Bool {
     if let leftInt = left as? IntegerObject, let rightInt = right as? IntegerObject {
         return leftInt.value == rightInt.value
     }

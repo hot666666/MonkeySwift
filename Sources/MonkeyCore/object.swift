@@ -9,13 +9,13 @@ public enum ObjectType: String {
 }
 
 // MARK: - Object Protocol
-public protocol Object: Sendable {
+public protocol Object {
     func type() -> ObjectType
     func inspect() -> String
 }
 
 // MARK: - Integer
-public struct IntegerObject: Object, Sendable {
+public struct IntegerObject: Object {
     public let value: Int
 
     public init(value: Int) {
@@ -32,7 +32,7 @@ public struct IntegerObject: Object, Sendable {
 }
 
 // MARK: - Boolean
-public struct BooleanObject: Object, Sendable {
+public struct BooleanObject: Object {
     public let value: Bool
 
     public init(value: Bool) {
@@ -49,7 +49,7 @@ public struct BooleanObject: Object, Sendable {
 }
 
 // MARK: - Null
-public struct NullObject: Object, Sendable {
+public struct NullObject: Object {
     public init() {}
 
     public func type() -> ObjectType {
@@ -62,10 +62,10 @@ public struct NullObject: Object, Sendable {
 }
 
 // MARK: - Return Value
-public struct ReturnValueObject: Object, Sendable {
-    public let value: any Object
+public struct ReturnValueObject: Object {
+    public let value: Object
 
-    public init(value: any Object) {
+    public init(value: Object) {
         self.value = value
     }
 
@@ -79,7 +79,7 @@ public struct ReturnValueObject: Object, Sendable {
 }
 
 // MARK: - Error
-public struct ErrorObject: Object, Sendable {
+public struct ErrorObject: Object {
     public let message: String
 
     public init(message: String) {
@@ -96,7 +96,7 @@ public struct ErrorObject: Object, Sendable {
 }
 
 // MARK: - Function
-public struct FunctionObject: Object, @unchecked Sendable {
+public struct FunctionObject: Object {
     public let parameters: [Identifier]
     public let body: BlockStatement
     public let env: Environment
