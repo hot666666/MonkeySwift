@@ -111,7 +111,8 @@ public struct Lexer: Sendable {
     }
 
     private func isLetter(_ character: Character) -> Bool {
-        return ("a"..."z").contains(character) || ("A"..."Z").contains(character) || character == "_"
+        return ("a"..."z").contains(character) || ("A"..."Z").contains(character)
+            || character == "_"
     }
 
     private func isDigit(_ character: Character) -> Bool {

@@ -36,7 +36,8 @@ public enum TokenType: Equatable, Sendable {
     case int(value: Int)
 
     // Operators
-    case assign, plus, minus, bang, asterisk, slash, comma, semicolon, lessThan, greaterThan, equal, notEqual
+    case assign, plus, minus, bang, asterisk, slash, comma, semicolon, lessThan, greaterThan, equal,
+        notEqual
 
     case leftParen, rightParen, leftBrace, rightBrace
 
