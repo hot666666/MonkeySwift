@@ -273,4 +273,61 @@ struct MonkeySwiftEvaluator {
         }
         #expect(integer.value == 55)
     }
+
+    @Test func testArrayLiterals() {
+        let input = "[1, 2 * 2, 3 + 3]"
+        let evaluated = testEval(input)
+        guard let array = evaluated as? ArrayObject else {
+            Issue.record("Object is not ArrayObject. got=\(type(of: evaluated))")
+            return
+        }
+
+        #expect(array.elements.count == 3)
+
+        guard let elem0 = array.elements[0] as? Integer else {
+            Issue.record("Element 0 is not Integer")
+            return
+        }
+        #expect(elem0.value == 1)
+
+        guard let elem1 = array.elements[1] as? Integer else {
+            Issue.record("Element 1 is not Integer")
+            return
+        }
+        #expect(elem1.value == 4)
+
+        guard let elem2 = array.elements[2] as? Integer else {
+            Issue.record("Element 2 is not Integer")
+            return
+        }
+        #expect(elem2.value == 6)
+    }
+
+    @Test func testArrayIndexExpressions() {
+        let tests: [(String, Any)] = [
+            ("[1, 2, 3][0]", 1),
+            ("[1, 2, 3][1]", 2),
+            ("[1, 2, 3][2]", 3),
+            ("let i = 0; [1][i];", 1),
+            ("[1, 2, 3][1 + 1];", 3),
+            ("let myArray = [1, 2, 3]; myArray[2];", 3),
+            ("let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6),
+            ("let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2),
+            ("[1, 2, 3][3]", Null()),
+            ("[1, 2, 3][-1]", Null()),
+        ]
+
+        for (input, expected) in tests {
+            let evaluated = testEval(input)
+            if let expectedInt = expected as? Int {
+                guard let integer = evaluated as? Integer else {
+                    Issue.record("Object is not Integer. got=\(type(of: evaluated))")
+                    continue
+                }
+                #expect(integer.value == expectedInt)
+            } else {
+                #expect(evaluated is Null)
+            }
+        }
+    }
 }
