@@ -59,6 +59,10 @@ public struct Lexer: Sendable {
             tokenType = .leftBrace
         case TokenSymbol.rightBrace.rawValue:
             tokenType = .rightBrace
+        case TokenSymbol.leftBracket.rawValue:
+            tokenType = .leftBracket
+        case TokenSymbol.rightBracket.rawValue:
+            tokenType = .rightBracket
         case let character? where isLetter(character):
             return TokenType(identifier: readIdentifier())
         case let character? where isDigit(character):

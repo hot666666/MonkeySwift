@@ -112,13 +112,15 @@ struct MonkeySwiftLexer {
 	}
 
 	@Test func testLexerDelimiters() async throws {
-		let input = "( ) { } , ;"
+		let input = "( ) { } [ ] , ;"
 		var lexer = Lexer(input: input)
 
 		#expect(lexer.nextTokenType() == .leftParen)
 		#expect(lexer.nextTokenType() == .rightParen)
 		#expect(lexer.nextTokenType() == .leftBrace)
 		#expect(lexer.nextTokenType() == .rightBrace)
+		#expect(lexer.nextTokenType() == .leftBracket)
+		#expect(lexer.nextTokenType() == .rightBracket)
 		#expect(lexer.nextTokenType() == .comma)
 		#expect(lexer.nextTokenType() == .semicolon)
 		#expect(lexer.nextTokenType() == .eof)
