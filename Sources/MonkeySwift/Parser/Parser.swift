@@ -368,7 +368,7 @@ public struct Parser {
     }
 
     private mutating func parseFunctionLiteral() -> FunctionLiteral? {
-        /// identifier ->
+        /// fn ->
         /// (parameter) { body }
         let token = currentToken
 

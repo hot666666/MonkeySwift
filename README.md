@@ -55,15 +55,17 @@ Feel free to type in commands
 Goodbye!
 ```
 
-## 특징
+## 구현
 
-- **렉싱 (Lexing)**: 소스 코드를 토큰으로 변환
-- **파싱 (Parsing)**: Pratt Parsing을 사용한 AST 생성
-- **평가 (Evaluation)**: Tree-walking 방식으로 AST 실행
-- **일급 함수 (First-class Functions)**: 함수를 값으로 취급
-- **정수 연산**: 사칙연산, 비교 연산
-- **불린 연산**: 논리 연산자 지원
-- **조건문**: if-else 표현식
+- [x] **렉싱 (Lexing)**: 소스 코드를 토큰으로 변환
+- [x] **파싱 (Parsing)**: Pratt Parsing을 사용한 AST 생성
+- [x] **평가 (Evaluation)**: Tree-walking 방식으로 AST 실행
+- [x] **일급 함수 (First-class Functions)**: 함수를 값으로 취급
+- [x] **정수 연산**: 사칙연산, 비교 연산
+- [x] **불린 연산**: 논리 연산자 지원
+- [x] **조건문**: if-else 표현식
+- [x] **배열**: 배열 리터럴 및 인덱스 접근 지원
+- [ ] VM 구현
 
 ### MonkeySwift는 전통적인 인터프리터 파이프라인을 따릅니다:
 
@@ -82,6 +84,8 @@ graph LR
 ```
 
 ## 언어 기능
+
+- 현재 REPL은 여러 줄 입력을 제대로 지원하지 않습니다.
 
 ### 1. 변수 바인딩
 
@@ -166,6 +170,14 @@ let factorial = fn(n) {
 factorial(5);      // 120
 ```
 
+### 9. 배열
+
+```monkey
+let arr = [1, 2, 3];
+arr[0];            // 1
+arr[777];          // nil
+```
+
 ## 주요 흐름
 
 ### Pratt Parsing(Expression Statement 부분)
@@ -239,6 +251,7 @@ protocol Expression: Node {}
 | Identifier       | x, myVar             | token, value: String      | 변수 이름 식별자 |
 | IntegerLiteral   | 5, 100               | token, value: Int         | 정수 숫자        |
 | BooleanLiteral   | true, false          | token, value: Bool        | 참/거짓 값       |
+| ArrayLiteral     | [1, 2], []           | token, elements: [Expr]   | 배열 리터럴      |
 
 
 #### 2. 연산자 식 (Operator Expressions)
@@ -247,6 +260,7 @@ protocol Expression: Node {}
 |-------------------|--------------------|----------------------------------------------|-----------------------------------|
 | PrefixExpression  | -5, !true          | token, operatorSymbol, right: Expression     | 전위 연산자 + 식 (오른쪽 항 하나) |
 | InfixExpression   | 5 + 5, x == y      | token, left, operatorSymbol, right           | 식 + 중위 연산자 + 식 (양쪽 항)   |
+| IndexExpression   | arr[0]             | token, left, index                           | 배열 인덱스 접근 (좌항[인덱스])   |
 
 
 #### 3. 제어 흐름 및 함수 (Control Flow & Functions)
