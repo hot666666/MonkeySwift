@@ -1,14 +1,21 @@
 typealias Position = Int
 
 // MARK: - Lexer
+/// Lexer는 입력된 문자열을 토큰으로 변환하는 역할을 합니다.
+/// - input: 입력된 문자열
+/// - currentPosition: 현재 위치 / character: 현재 위치의 문자
+/// - readPosition: 읽은 위치
 public struct Lexer: Sendable {
     let input: String
     var currentPosition: Position = 0
-    var readPosition: Position = 0
     var character: Character?
+    var readPosition: Position = 0
 
     public init(input: String) {
         self.input = input
+        /// Lexer 상태 세팅
+        /// - character = input[currentPosition]
+        /// - [currentPosition:0, readPosition:0] -> [currentPosition:0, readPosition:1]
         self.setNextCharacter()
     }
 

@@ -1,4 +1,5 @@
 // MARK: - Object Protocol
+/// Object는 모든 타입의 데이터를 표현하는 인터페이스입니다.
 public protocol Object: Sendable {
     var type: ObjectType { get }
     func inspect() -> String

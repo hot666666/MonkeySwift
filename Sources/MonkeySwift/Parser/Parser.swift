@@ -1,12 +1,12 @@
 // MARK: - Precedence
 enum Precedence: Int, Comparable {
     case lowest = 1
-    case equals = 2          // ==
-    case lessGreater = 3     // > or <
-    case sum = 4             // +
-    case product = 5         // *
-    case prefix = 6          // -X or !X
-    case call = 7            // myFunction(X)
+    case equals = 2  // == or !=
+    case lessGreater = 3  // > or <
+    case sum = 4  // + or -
+    case product = 5  // * or /
+    case prefix = 6  // -X or !X
+    case call = 7  // ( `함수 호출`
 
     static func < (lhs: Precedence, rhs: Precedence) -> Bool {
         return lhs.rawValue < rhs.rawValue
@@ -31,6 +31,10 @@ enum Precedence: Int, Comparable {
 }
 
 // MARK: - Parser
+/// Parser는 Lexer에서 토큰을 받아서 AST(Statement Nodes)를 만드는 역할을 합니다.
+/// - currentToken: 현재 토큰
+/// - peekToken: 다음 토큰
+/// - errors: 에러 메시지
 public struct Parser {
     var lexer: Lexer
     var currentToken: TokenType = .eof
@@ -38,10 +42,13 @@ public struct Parser {
     public var errors: [String] = []
 
     public init(lexer: Lexer) {
-				self.lexer = lexer
-			  // currentToken peekToken 할당
-				self.nextToken()
-				self.nextToken()
+        self.lexer = lexer
+        /// Parser 상태 세팅
+        /// [currentToken: .eof, peekToken: .eof]
+        /// -> [currentToken: X, peekToken: .eof]
+        /// -> [currentToken: X, peekToken: Y]
+        self.nextToken()
+        self.nextToken()
     }
 
     public mutating func parseProgram() -> Program {
@@ -72,9 +79,10 @@ public struct Parser {
         return peekToken == tokenType
     }
 
-		// 어떤 토큰을 기대했고, 실제로 무엇이 왔는지 에러 메시지로 기록
-		@discardableResult
+    // 어떤 토큰을 기대했고, 실제로 무엇이 왔는지 에러 메시지로 기록
+    @discardableResult
     private mutating func expectPeek(_ tokenType: TokenType) -> Bool {
+        /// 기대한 토큰이 peekToken이라면, nextToken()이 호출됨!
         if peekTokenIs(tokenType) {
             nextToken()
             return true
@@ -95,7 +103,8 @@ public struct Parser {
     // MARK: - Error Handling
 
     private mutating func peekError(_ tokenType: TokenType) {
-        let message = "expected next token to be \(tokenType.literal), got \(peekToken.literal) instead"
+        let message =
+            "expected next token to be \(tokenType.literal), got \(peekToken.literal) instead"
         errors.append(message)
     }
 
@@ -118,6 +127,7 @@ public struct Parser {
     }
 
     private mutating func parseLetStatement() -> LetStatement? {
+        /// Parse: let <identifier> = <expression>;
         let token = currentToken
 
         guard case .identifier(let name) = peekToken else {
@@ -147,6 +157,7 @@ public struct Parser {
     }
 
     private mutating func parseReturnStatement() -> ReturnStatement? {
+        /// Parse: return <expression>;
         let token = currentToken
 
         nextToken()
@@ -163,6 +174,7 @@ public struct Parser {
     }
 
     private mutating func parseExpressionStatement() -> ExpressionStatement? {
+        /// Parse: <expression>;
         let token = currentToken
 
         guard let expression = parseExpression(.lowest) else {
@@ -179,6 +191,7 @@ public struct Parser {
     }
 
     private mutating func parseBlockStatement() -> BlockStatement {
+        /// Parse: { <statement> }
         let token = currentToken
         var statements: [any Statement] = []
 
@@ -196,20 +209,23 @@ public struct Parser {
 
     // MARK: - Expression Parsing
 
-		// 이전 토큰의 precedence를 가지고 재귀적으로 동작
+    // 이전 토큰의 precedence를 가지고 재귀적으로 동작
     private mutating func parseExpression(_ precedence: Precedence) -> (any Expression)? {
+        /// prefix expression(식의 가장 앞부분에 올 수 있는 모든 것을 처리)
         guard var leftExp = parsePrefixExpression() else {
             noPrefixParseFnError(currentToken)
             return nil
         }
 
         while !peekTokenIs(.semicolon) && precedence < peekPrecedence() {
+            /// 다음에 오는 토큰이 prefix와 infix를 붙여주는 토큰인지 확인
             if !isInfixToken(peekToken) {
                 return leftExp
             }
 
             nextToken()
 
+            /// infix expression(식의 중간에 올 수 있는 모든 것을 처리)
             guard let infixExp = parseInfixExpression(leftExp) else {
                 return leftExp
             }
@@ -220,15 +236,18 @@ public struct Parser {
         return leftExp
     }
 
+    // Prefix Parse 이후 붙을 수 있는 Token
     private func isInfixToken(_ token: TokenType) -> Bool {
         switch token {
-        case .plus, .minus, .slash, .asterisk, .equal, .notEqual, .lessThan, .greaterThan, .leftParen:
+        case .plus, .minus, .slash, .asterisk, .equal, .notEqual, .lessThan, .greaterThan,
+            .leftParen:
             return true
         default:
             return false
         }
     }
 
+    // Prefix Parse될 수 있는 Expression
     private mutating func parsePrefixExpression() -> (any Expression)? {
         switch currentToken {
         case .identifier(let name):
@@ -247,6 +266,7 @@ public struct Parser {
             return parseIfExpression()
         case .function:
             return parseFunctionLiteral()
+        /// 위에서 처리하지 못한 것들은 Prefix Parse가 불가능
         default:
             return nil
         }
@@ -280,7 +300,8 @@ public struct Parser {
             return nil
         }
 
-        return InfixExpression(token: token, left: left, operatorSymbol: operatorSymbol, right: right)
+        return InfixExpression(
+            token: token, left: left, operatorSymbol: operatorSymbol, right: right)
     }
 
     private mutating func parseGroupedExpression() -> (any Expression)? {
@@ -296,6 +317,9 @@ public struct Parser {
     }
 
     private mutating func parseIfExpression() -> IfExpression? {
+        /// if ->
+        /// (condition) { consequence }
+        /// (condition) { consequence } else { alternative }
         let token = currentToken
 
         guard expectPeek(.leftParen) else {
@@ -330,10 +354,13 @@ public struct Parser {
             alternative = parseBlockStatement()
         }
 
-        return IfExpression(token: token, condition: condition, consequence: consequence, alternative: alternative)
+        return IfExpression(
+            token: token, condition: condition, consequence: consequence, alternative: alternative)
     }
 
     private mutating func parseFunctionLiteral() -> FunctionLiteral? {
+        /// identifier ->
+        /// (parameter) { body }
         let token = currentToken
 
         guard expectPeek(.leftParen) else {
@@ -354,6 +381,9 @@ public struct Parser {
     }
 
     private mutating func parseFunctionParameters() -> [Identifier]? {
+        /// ( ->
+        /// )
+        /// identifier, identifier, ...)
         var identifiers: [Identifier] = []
 
         if peekTokenIs(.rightParen) {
@@ -388,6 +418,8 @@ public struct Parser {
     }
 
     private mutating func parseCallExpression(_ function: any Expression) -> CallExpression? {
+        /// Identifier( ->
+        /// argument, argument, ...)
         let token = currentToken
         guard let arguments = parseExpressionList(.rightParen) else {
             return nil

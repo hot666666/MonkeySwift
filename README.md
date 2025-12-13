@@ -8,12 +8,9 @@ Monkey 언어 인터프리터입니다. "Writing An Interpreter In Go" 책을 �
 
 - [빌드 및 실행](#빌드-및-실행)
 - [특징](#특징)
-- [아키텍처](#아키텍처)
-- [프로젝트 구조](#프로젝트-구조)
 - [언어 기능](#언어-기능)
-- [예시 코드](#예시-코드)
-- [동작 흐름](#동작-흐름)
-- [테스트](#테스트)
+- [주요 흐름](#주요-흐름)
+- [주요 구성요소](#주요-구성요소)
 
 ## 빌드 및 실행
 
@@ -64,15 +61,11 @@ Goodbye!
 - **파싱 (Parsing)**: Pratt Parsing을 사용한 AST 생성
 - **평가 (Evaluation)**: Tree-walking 방식으로 AST 실행
 - **일급 함수 (First-class Functions)**: 함수를 값으로 취급
-- **클로저 (Closures)**: 외부 변수 캡처 지원
 - **정수 연산**: 사칙연산, 비교 연산
 - **불린 연산**: 논리 연산자 지원
 - **조건문**: if-else 표현식
-- **재귀 함수**: 재귀 호출 지원
 
-## 아키텍처
-
-MonkeySwift는 전통적인 인터프리터 파이프라인을 따릅니다:
+### MonkeySwift는 전통적인 인터프리터 파이프라인을 따릅니다:
 
 ```mermaid
 graph LR
@@ -86,78 +79,6 @@ graph LR
     style C fill:#ffe1f5
     style D fill:#e1ffe1
     style E fill:#f5e1ff
-```
-
-### 컴포넌트 구조
-
-```mermaid
-graph TD
-    subgraph "입력 처리"
-        REPL[REPL]
-        Main[main.swift]
-    end
-
-    subgraph "프론트엔드"
-        Token[Token]
-        Lexer[Lexer]
-        Parser[Parser]
-        AST[AST]
-    end
-
-    subgraph "백엔드"
-        Evaluator[Evaluator]
-        Object[Object System]
-        Env[Environment]
-    end
-
-    Main --> REPL
-    REPL --> Lexer
-    Lexer --> Token
-    Lexer --> Parser
-    Parser --> AST
-    Parser --> Evaluator
-    Evaluator --> Object
-    Evaluator --> Env
-
-    style REPL fill:#4a90e2
-    style Lexer fill:#50c878
-    style Parser fill:#9b59b6
-    style Evaluator fill:#e74c3c
-    style Object fill:#f39c12
-```
-
-## 프로젝트 구조
-
-```
-MonkeySwift/
-├── Sources/
-│   └── MonkeySwift/
-│       ├── Token/
-│       │   └── Token.swift          # 토큰 타입 정의
-│       ├── Lexer/
-│       │   └── Lexer.swift          # 어휘 분석기
-│       ├── AST/
-│       │   └── AST.swift            # 추상 구문 트리
-│       ├── Parser/
-│       │   └── Parser.swift         # 구문 분석기 (Pratt Parsing)
-│       ├── Object/
-│       │   ├── Object.swift         # 런타임 객체 시스템
-│       │   └── Environment.swift    # 변수 환경 (스코프)
-│       ├── Evaluator/
-│       │   └── Evaluator.swift      # 인터프리터 평가기
-│       ├── Repl/
-│       │   └── Repl.swift           # Read-Eval-Print Loop
-│       └── main.swift               # 진입점
-│
-└── Tests/
-    └── MonkeySwiftTests/
-        ├── TokenTests.swift         # Token 테스트
-        ├── LexerTests.swift         # Lexer 테스트
-        ├── ASTTests.swift           # AST 테스트
-        ├── ParserTests.swift        # Parser 테스트
-        ├── ObjectTests.swift        # Object 테스트
-        ├── EvaluatorTests.swift     # Evaluator 테스트
-        └── IntegrationTests.swift   # 통합 테스트
 ```
 
 ## 언어 기능
@@ -218,6 +139,7 @@ add(5, 10);      // 15
 
 ### 7. 고차 함수
 
+
 ```monkey
 let twice = fn(f, x) {
     f(f(x))
@@ -230,20 +152,7 @@ let addTwo = fn(x) {
 twice(addTwo, 1);  // 5
 ```
 
-### 8. 클로저
-
-```monkey
-let newAdder = fn(x) {
-    fn(y) {
-        x + y
-    }
-};
-
-let addTwo = newAdder(2);
-addTwo(3);         // 5
-```
-
-### 9. 재귀 함수
+### 8. 재귀 함수
 
 ```monkey
 let factorial = fn(n) {
@@ -257,172 +166,42 @@ let factorial = fn(n) {
 factorial(5);      // 120
 ```
 
-## 예시 코드
+## 주요 흐름
 
-### 피보나치 수열
-
-```monkey
-let fibonacci = fn(x) {
-    if (x == 0) {
-        0
-    } else {
-        if (x == 1) {
-            1
-        } else {
-            fibonacci(x - 1) + fibonacci(x - 2)
-        }
-    }
-};
-
-fibonacci(10);  // 55
-```
-
-### 최대값 찾기
-
-```monkey
-let max = fn(a, b) {
-    if (a > b) {
-        a
-    } else {
-        b
-    }
-};
-
-max(10, 20);  // 20
-```
-
-### 카운터 클로저
-
-```monkey
-let newCounter = fn() {
-    let count = 0;
-    fn(increment) {
-        if (increment) {
-            count = count + 1
-        }
-        count
-    }
-};
-
-let counter = newCounter();
-counter(true);   // 1
-counter(true);   // 2
-counter(false);  // 2
-```
-
-### 고차 함수 - Map
-
-```monkey
-let map = fn(arr, f) {
-    let iter = fn(arr, accumulated) {
-        if (len(arr) == 0) {
-            accumulated
-        } else {
-            iter(rest(arr), push(accumulated, f(first(arr))))
-        }
-    };
-    iter(arr, [])
-};
-
-let double = fn(x) { x * 2 };
-map([1, 2, 3, 4], double);  // [2, 4, 6, 8]
-```
-
-## 동작 흐름
-
-### 전체 실행 흐름
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant REPL
-    participant Lexer
-    participant Parser
-    participant Evaluator
-    participant Environment
-
-    User->>REPL: 입력 코드
-    REPL->>Lexer: 소스 코드 전달
-    Lexer->>Lexer: 토큰화
-    Lexer->>Parser: 토큰 스트림
-    Parser->>Parser: AST 생성
-    Parser->>Evaluator: AST 전달
-    Evaluator->>Environment: 변수 조회/저장
-    Environment-->>Evaluator: 값 반환
-    Evaluator->>Evaluator: AST 평가
-    Evaluator-->>REPL: 결과 Object
-    REPL-->>User: 출력
-```
-
-### 평가 과정 상세
+### Pratt Parsing(Expression Statement 부분)
 
 ```mermaid
 graph TD
-    Start[eval 함수 호출] --> CheckNode{노드 타입 확인}
+    Start["parseExpression(precedence) 호출"] --> Prefix["leftExp = parsePrefixExpression()"]
+    
+    Prefix --> PreCheck{{"!peekTokenIs(.semicolon) && <br/>precedence < peekPrecedence()"}}
+    
+    PreCheck -->|False| Return["leftExp 반환"]
+    PreCheck -->|True| InfixCheck{"isInfixToken(peekToken) ?"}
+    
+    InfixCheck -->|False| Return
+    InfixCheck -->|True| Consume["nextToken()"]
+    
+    Consume --> InfixLogic
+    
+    subgraph "parseInfixExpression 내부"
+    InfixLogic["right = parseExpression(currentPrecedence)"]
+    InfixLogic --> Combine["infixExp = InfixExpression(left, op, right)"]
+    end
 
-    CheckNode -->|Program| EvalProg[Program 평가]
-    CheckNode -->|Let Statement| EvalLet[Let 문 평가]
-    CheckNode -->|Return Statement| EvalReturn[Return 문 평가]
-    CheckNode -->|Expression| EvalExpr[Expression 평가]
+    Combine --> IsNil{"infixExp == nil ?"}
+    IsNil -->|Yes| Return
+    IsNil -->|No| Update["leftExp = infixExp"]
+    Update --> PreCheck
 
-    EvalLet --> SetEnv[Environment에 저장]
-    EvalReturn --> WrapReturn[ReturnValue로 래핑]
-
-    EvalExpr --> CheckExpr{Expression 타입}
-    CheckExpr -->|Integer| ReturnInt[Integer Object]
-    CheckExpr -->|Boolean| ReturnBool[Boolean Object]
-    CheckExpr -->|Identifier| LookupEnv[Environment 조회]
-    CheckExpr -->|Function| CreateFunc[Function Object 생성]
-    CheckExpr -->|Call| EvalCall[함수 호출 평가]
-    CheckExpr -->|Infix| EvalInfix[중위 연산 평가]
-    CheckExpr -->|Prefix| EvalPrefix[전위 연산 평가]
-    CheckExpr -->|If| EvalIf[조건문 평가]
-
-    EvalCall --> ExtendEnv[새 환경 생성]
-    ExtendEnv --> EvalBody[함수 본문 평가]
-
-    EvalProg --> Result[최종 결과 반환]
-    SetEnv --> Result
-    WrapReturn --> Result
-    ReturnInt --> Result
-    ReturnBool --> Result
-    LookupEnv --> Result
-    CreateFunc --> Result
-    EvalBody --> Result
-    EvalInfix --> Result
-    EvalPrefix --> Result
-    EvalIf --> Result
-
-    style Start fill:#4a90e2
-    style Result fill:#50c878
-    style CheckNode fill:#f39c12
-    style CheckExpr fill:#e74c3c
+    style Start fill:#4a90e2,stroke:#1f4e79,stroke-width:1px,color:#fff
+    style Return fill:#50c878,stroke:#1d6b3a,stroke-width:1px,color:#fff
+    style PreCheck fill:#e74c3c,stroke:#7a1f18,stroke-width:1px,color:#fff
+    style InfixLogic fill:#9b59b6,stroke:#4c2a63,stroke-width:1px,color:#fff
+    style InfixCheck fill:#f1c40f,stroke:#7d6608,stroke-width:1px,color:#111
 ```
 
-### Parser의 Pratt Parsing 흐름
-
-```mermaid
-graph TD
-    Start[parseExpression 호출] --> Prefix[Prefix 파싱]
-    Prefix --> CheckInfix{Infix 연산자 존재?}
-
-    CheckInfix -->|No| Return[Expression 반환]
-    CheckInfix -->|Yes| CheckPrec{우선순위 비교}
-
-    CheckPrec -->|현재 < Peek| ParseInfix[Infix 파싱]
-    CheckPrec -->|현재 >= Peek| Return
-
-    ParseInfix --> Recurse[parseExpression 재귀]
-    Recurse --> Combine[좌우 Expression 결합]
-    Combine --> CheckInfix
-
-    style Start fill:#4a90e2
-    style Return fill:#50c878
-    style CheckPrec fill:#e74c3c
-    style Recurse fill:#9b59b6
-```
-
-## 기술적 세부사항
+## 주요 구성요소
 
 ### Token
 
@@ -453,6 +232,31 @@ protocol Statement: Node {}
 protocol Expression: Node {}
 ```
 
+#### 1. 기본 값 (Literals)
+
+| 타입             | 예시                 | 코드구조 (Struct)        | 설명             |
+|------------------|----------------------|---------------------------|------------------|
+| Identifier       | x, myVar             | token, value: String      | 변수 이름 식별자 |
+| IntegerLiteral   | 5, 100               | token, value: Int         | 정수 숫자        |
+| BooleanLiteral   | true, false          | token, value: Bool        | 참/거짓 값       |
+
+
+#### 2. 연산자 식 (Operator Expressions)
+
+| 타입              | 예시               | 코드구조 (Struct)                            | 설명                              |
+|-------------------|--------------------|----------------------------------------------|-----------------------------------|
+| PrefixExpression  | -5, !true          | token, operatorSymbol, right: Expression     | 전위 연산자 + 식 (오른쪽 항 하나) |
+| InfixExpression   | 5 + 5, x == y      | token, left, operatorSymbol, right           | 식 + 중위 연산자 + 식 (양쪽 항)   |
+
+
+#### 3. 제어 흐름 및 함수 (Control Flow & Functions)
+
+| 타입             | 예시                              | 코드구조 (Struct)                                        | 설명                               |
+|------------------|-----------------------------------|----------------------------------------------------------|------------------------------------|
+| IfExpression     | if (x < y) { x } else { y }      | token, condition, consequence, alternative?              | 조건문 (monkey에선 값을 반환하는 식) |
+| FunctionLiteral  | fn(x, y) { x + y }               | token, parameters: [Identifier], body                    | 함수 정의 (파라미터 목록 + 바디)    |
+| CallExpression   | add(1, 2)                        | token, function, arguments: [Expression]                 | 함수 호출 (함수 식 + 인자 목록)
+
 ### Object System
 
 런타임 값들은 `Object` 프로토콜을 구현합니다:
@@ -480,8 +284,6 @@ class Environment {
 }
 ```
 
-## 참고 자료
+## 참고
 
 - 📖 [Writing An Interpreter In Go](https://interpreterbook.com/) - Thorsten Ball
-- 🦅 [Swift Programming Language](https://swift.org/)
-- 🐵 [Monkey Language Specification](https://monkeylang.org/)

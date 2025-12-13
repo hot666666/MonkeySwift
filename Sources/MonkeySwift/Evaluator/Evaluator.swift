@@ -4,6 +4,7 @@ private let FALSE = Boolean(value: false)
 private let NULL = Null()
 
 // MARK: - Evaluator
+/// Evaluator는 AST를 받아서 Object를 만드는 역할을 합니다.
 public func eval(node: Node, environment: Environment) -> any Object {
     switch node {
     // Program
@@ -147,9 +148,12 @@ private func evalMinusPrefixOperatorExpression(_ right: any Object) -> any Objec
     return Integer(value: -integer.value)
 }
 
-private func evalInfixExpression(operatorSymbol: String, left: any Object, right: any Object) -> any Object {
+private func evalInfixExpression(operatorSymbol: String, left: any Object, right: any Object)
+    -> any Object
+{
     if let leftInt = left as? Integer, let rightInt = right as? Integer {
-        return evalIntegerInfixExpression(operatorSymbol: operatorSymbol, left: leftInt, right: rightInt)
+        return evalIntegerInfixExpression(
+            operatorSymbol: operatorSymbol, left: leftInt, right: rightInt)
     }
 
     if let leftBool = left as? Boolean, let rightBool = right as? Boolean {
@@ -159,18 +163,26 @@ private func evalInfixExpression(operatorSymbol: String, left: any Object, right
         case "!=":
             return nativeBoolToBooleanObject(leftBool.value != rightBool.value)
         default:
-            return ErrorObject(message: "unknown operator: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)")
+            return ErrorObject(
+                message:
+                    "unknown operator: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)"
+            )
         }
     }
 
     if left.type != right.type {
-        return ErrorObject(message: "type mismatch: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)")
+        return ErrorObject(
+            message: "type mismatch: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)"
+        )
     }
 
-    return ErrorObject(message: "unknown operator: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)")
+    return ErrorObject(
+        message: "unknown operator: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)")
 }
 
-private func evalIntegerInfixExpression(operatorSymbol: String, left: Integer, right: Integer) -> any Object {
+private func evalIntegerInfixExpression(operatorSymbol: String, left: Integer, right: Integer)
+    -> any Object
+{
     switch operatorSymbol {
     case "+":
         return Integer(value: left.value + right.value)
@@ -189,7 +201,9 @@ private func evalIntegerInfixExpression(operatorSymbol: String, left: Integer, r
     case "!=":
         return nativeBoolToBooleanObject(left.value != right.value)
     default:
-        return ErrorObject(message: "unknown operator: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)")
+        return ErrorObject(
+            message:
+                "unknown operator: \(left.type.rawValue) \(operatorSymbol) \(right.type.rawValue)")
     }
 }
 
@@ -216,7 +230,9 @@ private func evalIdentifier(_ node: Identifier, environment: Environment) -> any
 }
 
 // MARK: - Function Evaluation
-private func evalExpressions(_ expressions: [any Expression], environment: Environment) -> [any Object] {
+private func evalExpressions(_ expressions: [any Expression], environment: Environment)
+    -> [any Object]
+{
     var result: [any Object] = []
 
     for expr in expressions {
