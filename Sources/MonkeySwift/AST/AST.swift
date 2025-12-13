@@ -253,3 +253,38 @@ public struct CallExpression: Expression, Sendable {
         return "\(function.string())(\(args))"
     }
 }
+
+public struct ArrayLiteral: Expression, Sendable {
+    public let token: TokenType  // '[' token
+    public let elements: [any Expression]
+
+    public init(token: TokenType, elements: [any Expression]) {
+        self.token = token
+        self.elements = elements
+    }
+
+    public var tokenLiteral: String { token.literal }
+
+    public func string() -> String {
+        let elems = elements.map { $0.string() }.joined(separator: ", ")
+        return "[\(elems)]"
+    }
+}
+
+public struct IndexExpression: Expression, Sendable {
+    public let token: TokenType  // '[' token
+    public let left: any Expression
+    public let index: any Expression
+
+    public init(token: TokenType, left: any Expression, index: any Expression) {
+        self.token = token
+        self.left = left
+        self.index = index
+    }
+
+    public var tokenLiteral: String { token.literal }
+
+    public func string() -> String {
+        return "(\(left.string())[\(index.string())])"
+    }
+}

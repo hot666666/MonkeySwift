@@ -474,4 +474,41 @@ struct MonkeySwiftParser {
 
         #expect(program.string() == "let myVar = anotherVar;")
     }
+
+    @Test func testArrayLiteral() {
+        let input = "[1, 2 * 2, 3 + 3]"
+
+        let (program, errors) = parseProgram(input)
+        checkParserErrors(errors)
+
+        guard let stmt = program.statements[0] as? ExpressionStatement else {
+            Issue.record("Statement is not ExpressionStatement")
+            return
+        }
+
+        guard let array = stmt.expression as? ArrayLiteral else {
+            Issue.record("Expression is not ArrayLiteral")
+            return
+        }
+
+        #expect(array.elements.count == 3)
+
+        guard let idx0 = array.elements[0] as? IntegerLiteral else {
+            Issue.record("First element is not IntegerLiteral")
+            return
+        }
+        #expect(idx0.value == 1)
+
+        guard let idx1 = array.elements[1] as? InfixExpression else {
+            Issue.record("Second element is not InfixExpression")
+            return
+        }
+        #expect(idx1.operatorSymbol == "*")
+
+        guard let idx2 = array.elements[2] as? InfixExpression else {
+            Issue.record("Third element is not InfixExpression")
+            return
+        }
+        #expect(idx2.operatorSymbol == "+")
+    }
 }
