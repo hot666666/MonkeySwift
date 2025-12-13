@@ -5,6 +5,7 @@ private let NULL = Null()
 
 // MARK: - Evaluator
 /// Evaluator는 AST를 받아서 Object를 만드는 역할을 합니다.
+/// 방문은 Pre-order이고, 값의 평가는 재귀 호출이 모두 끝난 뒤 Post-order에 확정
 public func eval(node: Node, environment: Environment) -> any Object {
     switch node {
     // Program

@@ -1,31 +1,32 @@
 import Testing
+
 @testable import MonkeySwift
 
 @Suite("LexerTests")
 struct MonkeySwiftLexer {
 	@Test func testLexerTokenization() async throws {
 		let input = """
-		let five = 5;
-		let ten = 10;
-		
-		let add = fn(x, y) {
-			x + y;
-		};
-		
-		let result = add(five, ten);
-		!-/*5;
-		5 < 10 > 5;
-		
-		if (5 < 10) {
-				return true;
-		} else {
-				return false;
-		}
-		
-		10 == 10;
-		10 != 9;
-		"""
-		
+			let five = 5;
+			let ten = 10;
+
+			let add = fn(x, y) {
+				x + y;
+			};
+
+			let result = add(five, ten);
+			!-/*5;
+			5 < 10 > 5;
+
+			if (5 < 10) {
+					return true;
+			} else {
+					return false;
+			}
+
+			10 == 10;
+			10 != 9;
+			"""
+
 		let expectedTokens: [TokenType] = [
 			.let, .identifier(name: "five"), .assign, .int(value: 5), .semicolon,
 			.let, .identifier(name: "ten"), .assign, .int(value: 10), .semicolon,
@@ -44,43 +45,45 @@ struct MonkeySwiftLexer {
 			.rightBrace,
 			.int(value: 10), .equal, .int(value: 10), .semicolon,
 			.int(value: 10), .notEqual, .int(value: 9), .semicolon,
-			.eof
+			.eof,
 		]
-		
+
 		var lexer = Lexer(input: input)
-		
+
 		for (index, expected) in expectedTokens.enumerated() {
 			let token = lexer.nextTokenType()
-			#expect(token == expected, "Token \(index): expected \(expected.literal), got \(token.literal)")
+			#expect(
+				token == expected,
+				"Token \(index): expected \(expected.literal), got \(token.literal)")
 		}
 	}
-	
+
 	@Test func testLexerNumbers() async throws {
 		let input = "0 1 42 999"
 		var lexer = Lexer(input: input)
-		
+
 		#expect(lexer.nextTokenType() == .int(value: 0))
 		#expect(lexer.nextTokenType() == .int(value: 1))
 		#expect(lexer.nextTokenType() == .int(value: 42))
 		#expect(lexer.nextTokenType() == .int(value: 999))
 		#expect(lexer.nextTokenType() == .eof)
 	}
-	
+
 	@Test func testLexerIdentifiers() async throws {
 		let input = "foo bar baz_123 _test"
 		var lexer = Lexer(input: input)
-		
+
 		#expect(lexer.nextTokenType() == .identifier(name: "foo"))
 		#expect(lexer.nextTokenType() == .identifier(name: "bar"))
 		#expect(lexer.nextTokenType() == .identifier(name: "baz_123"))
 		#expect(lexer.nextTokenType() == .identifier(name: "_test"))
 		#expect(lexer.nextTokenType() == .eof)
 	}
-	
+
 	@Test func testLexerKeywords() async throws {
 		let input = "let fn true false if else return"
 		var lexer = Lexer(input: input)
-		
+
 		#expect(lexer.nextTokenType() == .let)
 		#expect(lexer.nextTokenType() == .function)
 		#expect(lexer.nextTokenType() == .true)
@@ -90,11 +93,11 @@ struct MonkeySwiftLexer {
 		#expect(lexer.nextTokenType() == .return)
 		#expect(lexer.nextTokenType() == .eof)
 	}
-	
+
 	@Test func testLexerOperators() async throws {
 		let input = "= + - ! * / < > == !="
 		var lexer = Lexer(input: input)
-		
+
 		#expect(lexer.nextTokenType() == .assign)
 		#expect(lexer.nextTokenType() == .plus)
 		#expect(lexer.nextTokenType() == .minus)
@@ -107,11 +110,11 @@ struct MonkeySwiftLexer {
 		#expect(lexer.nextTokenType() == .notEqual)
 		#expect(lexer.nextTokenType() == .eof)
 	}
-	
+
 	@Test func testLexerDelimiters() async throws {
 		let input = "( ) { } , ;"
 		var lexer = Lexer(input: input)
-		
+
 		#expect(lexer.nextTokenType() == .leftParen)
 		#expect(lexer.nextTokenType() == .rightParen)
 		#expect(lexer.nextTokenType() == .leftBrace)

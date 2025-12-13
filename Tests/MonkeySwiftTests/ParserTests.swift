@@ -1,4 +1,5 @@
 import Testing
+
 @testable import MonkeySwift
 
 @Suite("ParserTests")
@@ -22,10 +23,10 @@ struct MonkeySwiftParser {
 
     @Test func testLetStatements() {
         let input = """
-        let x = 5;
-        let y = 10;
-        let foobar = 838383;
-        """
+            let x = 5;
+            let y = 10;
+            let foobar = 838383;
+            """
 
         let (program, errors) = parseProgram(input)
         checkParserErrors(errors)
@@ -50,10 +51,10 @@ struct MonkeySwiftParser {
 
     @Test func testReturnStatements() {
         let input = """
-        return 5;
-        return 10;
-        return 993322;
-        """
+            return 5;
+            return 10;
+            return 993322;
+            """
 
         let (program, errors) = parseProgram(input)
         checkParserErrors(errors)
@@ -117,7 +118,7 @@ struct MonkeySwiftParser {
     @Test func testBooleanExpression() {
         let tests: [(String, Bool)] = [
             ("true;", true),
-            ("false;", false)
+            ("false;", false),
         ]
 
         for (input, expectedValue) in tests {
@@ -145,7 +146,7 @@ struct MonkeySwiftParser {
             ("!5;", "!", 5),
             ("-15;", "-", 15),
             ("!true;", "!", true),
-            ("!false;", "!", false)
+            ("!false;", "!", false),
         ]
 
         for (input, expectedOperator, expectedValue) in tests {
@@ -194,7 +195,7 @@ struct MonkeySwiftParser {
             ("5 != 5;", 5, "!=", 5),
             ("true == true", true, "==", true),
             ("true != false", true, "!=", false),
-            ("false == false", false, "==", false)
+            ("false == false", false, "==", false),
         ]
 
         for (input, leftValue, operatorSymbol, rightValue) in tests {
@@ -217,7 +218,8 @@ struct MonkeySwiftParser {
 
             if let intLeft = leftValue as? Int, let intRight = rightValue as? Int {
                 guard let left = infixExpr.left as? IntegerLiteral,
-                      let right = infixExpr.right as? IntegerLiteral else {
+                    let right = infixExpr.right as? IntegerLiteral
+                else {
                     Issue.record("Left or Right is not IntegerLiteral")
                     continue
                 }
@@ -225,7 +227,8 @@ struct MonkeySwiftParser {
                 #expect(right.value == intRight)
             } else if let boolLeft = leftValue as? Bool, let boolRight = rightValue as? Bool {
                 guard let left = infixExpr.left as? BooleanLiteral,
-                      let right = infixExpr.right as? BooleanLiteral else {
+                    let right = infixExpr.right as? BooleanLiteral
+                else {
                     Issue.record("Left or Right is not BooleanLiteral")
                     continue
                 }
@@ -257,7 +260,7 @@ struct MonkeySwiftParser {
             ("(5 + 5) * 2", "((5 + 5) * 2)"),
             ("2 / (5 + 5)", "(2 / (5 + 5))"),
             ("-(5 + 5)", "(-(5 + 5))"),
-            ("!(true == true)", "(!(true == true))")
+            ("!(true == true)", "(!(true == true))"),
         ]
 
         for (input, expected) in tests {
@@ -374,7 +377,7 @@ struct MonkeySwiftParser {
         let tests: [(String, [String])] = [
             ("fn() {};", []),
             ("fn(x) {};", ["x"]),
-            ("fn(x, y, z) {};", ["x", "y", "z"])
+            ("fn(x, y, z) {};", ["x", "y", "z"]),
         ]
 
         for (input, expectedParams) in tests {
@@ -447,8 +450,11 @@ struct MonkeySwiftParser {
     @Test func testCallExpressionPrecedence() {
         let tests: [(String, String)] = [
             ("a + add(b * c) + d", "((a + add((b * c))) + d)"),
-            ("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
-            ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))")
+            (
+                "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))",
+                "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"
+            ),
+            ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"),
         ]
 
         for (input, expected) in tests {

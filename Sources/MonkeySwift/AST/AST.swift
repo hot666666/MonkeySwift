@@ -173,7 +173,9 @@ public struct InfixExpression: Expression, Sendable {
     public let operatorSymbol: String
     public let right: any Expression
 
-    public init(token: TokenType, left: any Expression, operatorSymbol: String, right: any Expression) {
+    public init(
+        token: TokenType, left: any Expression, operatorSymbol: String, right: any Expression
+    ) {
         self.token = token
         self.left = left
         self.operatorSymbol = operatorSymbol
@@ -193,7 +195,10 @@ public struct IfExpression: Expression, Sendable {
     public let consequence: BlockStatement
     public let alternative: BlockStatement?
 
-    public init(token: TokenType, condition: any Expression, consequence: BlockStatement, alternative: BlockStatement? = nil) {
+    public init(
+        token: TokenType, condition: any Expression, consequence: BlockStatement,
+        alternative: BlockStatement? = nil
+    ) {
         self.token = token
         self.condition = condition
         self.consequence = consequence
