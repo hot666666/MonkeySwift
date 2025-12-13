@@ -5,6 +5,7 @@ private let NULL = Null()
 
 // MARK: - Evaluator
 /// Evaluator는 AST를 받아서 Object를 만드는 역할을 합니다.
+/// 방문은 Pre-order이고, 값의 평가는 재귀 호출이 모두 끝난 뒤 Post-order에 확정
 public func eval(node: Node, environment: Environment) -> any Object {
     switch node {
     // Program
@@ -77,6 +78,24 @@ public func eval(node: Node, environment: Environment) -> any Object {
             return args[0]
         }
         return applyFunction(function, args: args)
+
+    case let expr as ArrayLiteral:
+        let elements = evalExpressions(expr.elements, environment: environment)
+        if elements.count == 1 && isError(elements[0]) {
+            return elements[0]
+        }
+        return ArrayObject(elements: elements)
+
+    case let expr as IndexExpression:
+        let left = eval(node: expr.left, environment: environment)
+        if isError(left) {
+            return left
+        }
+        let index = eval(node: expr.index, environment: environment)
+        if isError(index) {
+            return index
+        }
+        return evalIndexExpression(left: left, index: index)
 
     default:
         return NULL
@@ -227,6 +246,31 @@ private func evalIdentifier(_ node: Identifier, environment: Environment) -> any
         return value
     }
     return ErrorObject(message: "identifier not found: \(node.value)")
+}
+
+private func evalIndexExpression(left: any Object, index: any Object) -> any Object {
+    if left.type == .array && index.type == .integer {
+        return evalArrayIndexExpression(array: left, index: index)
+    }
+    return ErrorObject(message: "index operator not supported: \(left.type.rawValue)")
+}
+
+private func evalArrayIndexExpression(array: any Object, index: any Object) -> any Object {
+    guard let arrayObject = array as? ArrayObject else {
+        return ErrorObject(message: "not an array: \(array.type.rawValue)")
+    }
+    guard let integerObject = index as? Integer else {
+        return ErrorObject(message: "index is not integer: \(index.type.rawValue)")
+    }
+
+    let idx = integerObject.value
+    let max = arrayObject.elements.count - 1
+
+    if idx < 0 || idx > max {
+        return NULL
+    }
+
+    return arrayObject.elements[idx]
 }
 
 // MARK: - Function Evaluation

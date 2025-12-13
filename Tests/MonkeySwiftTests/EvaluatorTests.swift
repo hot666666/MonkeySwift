@@ -1,4 +1,5 @@
 import Testing
+
 @testable import MonkeySwift
 
 @Suite("EvaluatorTests")
@@ -27,7 +28,7 @@ struct MonkeySwiftEvaluator {
             ("2 * (5 + 10)", 30),
             ("3 * 3 * 3 + 10", 37),
             ("3 * (3 * 3) + 10", 37),
-            ("(5 + 10 * 2 + 15 / 3) * 2 + -10", 50)
+            ("(5 + 10 * 2 + 15 / 3) * 2 + -10", 50),
         ]
 
         for (input, expected) in tests {
@@ -60,7 +61,7 @@ struct MonkeySwiftEvaluator {
             ("(1 < 2) == true", true),
             ("(1 < 2) == false", false),
             ("(1 > 2) == true", false),
-            ("(1 > 2) == false", true)
+            ("(1 > 2) == false", true),
         ]
 
         for (input, expected) in tests {
@@ -80,7 +81,7 @@ struct MonkeySwiftEvaluator {
             ("!5", false),
             ("!!true", true),
             ("!!false", false),
-            ("!!5", true)
+            ("!!5", true),
         ]
 
         for (input, expected) in tests {
@@ -101,7 +102,7 @@ struct MonkeySwiftEvaluator {
             ("if (1 < 2) { 10 }", 10),
             ("if (1 > 2) { 10 }", nil),
             ("if (1 > 2) { 10 } else { 20 }", 20),
-            ("if (1 < 2) { 10 } else { 20 }", 10)
+            ("if (1 < 2) { 10 } else { 20 }", 10),
         ]
 
         for (input, expected) in tests {
@@ -125,14 +126,16 @@ struct MonkeySwiftEvaluator {
             ("return 10; 9;", 10),
             ("return 2 * 5; 9;", 10),
             ("9; return 2 * 5; 9;", 10),
-            ("""
-            if (10 > 1) {
+            (
+                """
                 if (10 > 1) {
-                    return 10;
+                    if (10 > 1) {
+                        return 10;
+                    }
+                    return 1;
                 }
-                return 1;
-            }
-            """, 10)
+                """, 10
+            ),
         ]
 
         for (input, expected) in tests {
@@ -153,15 +156,17 @@ struct MonkeySwiftEvaluator {
             ("true + false;", "unknown operator: BOOLEAN + BOOLEAN"),
             ("5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"),
             ("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
-            ("""
-            if (10 > 1) {
+            (
+                """
                 if (10 > 1) {
-                    return true + false;
+                    if (10 > 1) {
+                        return true + false;
+                    }
+                    return 1;
                 }
-                return 1;
-            }
-            """, "unknown operator: BOOLEAN + BOOLEAN"),
-            ("foobar", "identifier not found: foobar")
+                """, "unknown operator: BOOLEAN + BOOLEAN"
+            ),
+            ("foobar", "identifier not found: foobar"),
         ]
 
         for (input, expectedMessage) in tests {
@@ -170,7 +175,9 @@ struct MonkeySwiftEvaluator {
                 Issue.record("Object is not ErrorObject. got=\(type(of: evaluated))")
                 continue
             }
-            #expect(error.message == expectedMessage, "Expected '\(expectedMessage)', got '\(error.message)'")
+            #expect(
+                error.message == expectedMessage,
+                "Expected '\(expectedMessage)', got '\(error.message)'")
         }
     }
 
@@ -179,7 +186,7 @@ struct MonkeySwiftEvaluator {
             ("let a = 5; a;", 5),
             ("let a = 5 * 5; a;", 25),
             ("let a = 5; let b = a; b;", 5),
-            ("let a = 5; let b = a; let c = a + b + 5; c;", 15)
+            ("let a = 5; let b = a; let c = a + b + 5; c;", 15),
         ]
 
         for (input, expected) in tests {
@@ -213,7 +220,7 @@ struct MonkeySwiftEvaluator {
             ("let double = fn(x) { x * 2; }; double(5);", 10),
             ("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
             ("let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20),
-            ("fn(x) { x; }(5)", 5)
+            ("fn(x) { x; }(5)", 5),
         ]
 
         for (input, expected) in tests {
@@ -228,12 +235,12 @@ struct MonkeySwiftEvaluator {
 
     @Test func testClosures() {
         let input = """
-        let newAdder = fn(x) {
-            fn(y) { x + y };
-        };
-        let addTwo = newAdder(2);
-        addTwo(2);
-        """
+            let newAdder = fn(x) {
+                fn(y) { x + y };
+            };
+            let addTwo = newAdder(2);
+            addTwo(2);
+            """
 
         let evaluated = testEval(input)
         guard let integer = evaluated as? Integer else {
@@ -245,19 +252,19 @@ struct MonkeySwiftEvaluator {
 
     @Test func testRecursiveFunction() {
         let input = """
-        let fibonacci = fn(x) {
-            if (x == 0) {
-                0
-            } else {
-                if (x == 1) {
-                    1
+            let fibonacci = fn(x) {
+                if (x == 0) {
+                    0
                 } else {
-                    fibonacci(x - 1) + fibonacci(x - 2)
+                    if (x == 1) {
+                        1
+                    } else {
+                        fibonacci(x - 1) + fibonacci(x - 2)
+                    }
                 }
-            }
-        };
-        fibonacci(10);
-        """
+            };
+            fibonacci(10);
+            """
 
         let evaluated = testEval(input)
         guard let integer = evaluated as? Integer else {
@@ -265,5 +272,62 @@ struct MonkeySwiftEvaluator {
             return
         }
         #expect(integer.value == 55)
+    }
+
+    @Test func testArrayLiterals() {
+        let input = "[1, 2 * 2, 3 + 3]"
+        let evaluated = testEval(input)
+        guard let array = evaluated as? ArrayObject else {
+            Issue.record("Object is not ArrayObject. got=\(type(of: evaluated))")
+            return
+        }
+
+        #expect(array.elements.count == 3)
+
+        guard let elem0 = array.elements[0] as? Integer else {
+            Issue.record("Element 0 is not Integer")
+            return
+        }
+        #expect(elem0.value == 1)
+
+        guard let elem1 = array.elements[1] as? Integer else {
+            Issue.record("Element 1 is not Integer")
+            return
+        }
+        #expect(elem1.value == 4)
+
+        guard let elem2 = array.elements[2] as? Integer else {
+            Issue.record("Element 2 is not Integer")
+            return
+        }
+        #expect(elem2.value == 6)
+    }
+
+    @Test func testArrayIndexExpressions() {
+        let tests: [(String, Any)] = [
+            ("[1, 2, 3][0]", 1),
+            ("[1, 2, 3][1]", 2),
+            ("[1, 2, 3][2]", 3),
+            ("let i = 0; [1][i];", 1),
+            ("[1, 2, 3][1 + 1];", 3),
+            ("let myArray = [1, 2, 3]; myArray[2];", 3),
+            ("let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6),
+            ("let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2),
+            ("[1, 2, 3][3]", Null()),
+            ("[1, 2, 3][-1]", Null()),
+        ]
+
+        for (input, expected) in tests {
+            let evaluated = testEval(input)
+            if let expectedInt = expected as? Int {
+                guard let integer = evaluated as? Integer else {
+                    Issue.record("Object is not Integer. got=\(type(of: evaluated))")
+                    continue
+                }
+                #expect(integer.value == expectedInt)
+            } else {
+                #expect(evaluated is Null)
+            }
+        }
     }
 }

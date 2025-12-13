@@ -14,6 +14,8 @@ public enum TokenSymbol: Character {
     case rightBrace = "}"
     case lessThan = "<"
     case greaterThan = ">"
+    case leftBracket = "["
+    case rightBracket = "]"
 }
 
 // MARK: - TokenKeyword
@@ -39,7 +41,7 @@ public enum TokenType: Equatable, Sendable {
     case assign, plus, minus, bang, asterisk, slash, comma, semicolon, lessThan, greaterThan, equal,
         notEqual
 
-    case leftParen, rightParen, leftBrace, rightBrace
+    case leftParen, rightParen, leftBrace, rightBrace, leftBracket, rightBracket
 
     // Keywords
     case function, `let`, `true`, `false`, `if`, `else`, `return`
@@ -66,6 +68,8 @@ public enum TokenType: Equatable, Sendable {
         case .rightParen: return String(TokenSymbol.rightParen.rawValue)
         case .leftBrace: return String(TokenSymbol.leftBrace.rawValue)
         case .rightBrace: return String(TokenSymbol.rightBrace.rawValue)
+        case .leftBracket: return String(TokenSymbol.leftBracket.rawValue)
+        case .rightBracket: return String(TokenSymbol.rightBracket.rawValue)
         case .function: return TokenKeyword.fn.rawValue
         case .let: return TokenKeyword.let.rawValue
         case .true: return TokenKeyword.true.rawValue
@@ -99,6 +103,8 @@ public enum TokenType: Equatable, Sendable {
         case .rightParen: self = .rightParen
         case .leftBrace: self = .leftBrace
         case .rightBrace: self = .rightBrace
+        case .leftBracket: self = .leftBracket
+        case .rightBracket: self = .rightBracket
         }
     }
 

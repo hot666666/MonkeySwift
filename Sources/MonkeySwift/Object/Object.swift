@@ -13,6 +13,7 @@ public enum ObjectType: String, Sendable {
     case returnValue = "RETURN_VALUE"
     case error = "ERROR"
     case function = "FUNCTION"
+    case array = "ARRAY"
 }
 
 // MARK: - Integer
@@ -103,5 +104,21 @@ public struct Function: Object {
     public func inspect() -> String {
         let params = parameters.map { $0.string() }.joined(separator: ", ")
         return "fn(\(params)) {\n\(body.string())\n}"
+    }
+}
+
+// MARK: - Array
+public struct ArrayObject: Object {
+    public let elements: [any Object]
+
+    public init(elements: [any Object]) {
+        self.elements = elements
+    }
+
+    public var type: ObjectType { .array }
+
+    public func inspect() -> String {
+        let elems = elements.map { $0.inspect() }.joined(separator: ", ")
+        return "[\(elems)]"
     }
 }

@@ -7,6 +7,7 @@ enum Precedence: Int, Comparable {
     case product = 5  // * or /
     case prefix = 6  // -X or !X
     case call = 7  // ( `함수 호출`
+    case index = 8  // [ `인덱스 접근`
 
     static func < (lhs: Precedence, rhs: Precedence) -> Bool {
         return lhs.rawValue < rhs.rawValue
@@ -24,6 +25,8 @@ enum Precedence: Int, Comparable {
             return .product
         case .leftParen:
             return .call
+        case .leftBracket:
+            return .index
         default:
             return .lowest
         }
@@ -240,7 +243,7 @@ public struct Parser {
     private func isInfixToken(_ token: TokenType) -> Bool {
         switch token {
         case .plus, .minus, .slash, .asterisk, .equal, .notEqual, .lessThan, .greaterThan,
-            .leftParen:
+            .leftParen, .leftBracket:
             return true
         default:
             return false
@@ -266,6 +269,8 @@ public struct Parser {
             return parseIfExpression()
         case .function:
             return parseFunctionLiteral()
+        case .leftBracket:
+            return parseArrayLiteral()
         /// 위에서 처리하지 못한 것들은 Prefix Parse가 불가능
         default:
             return nil
@@ -288,6 +293,10 @@ public struct Parser {
     private mutating func parseInfixExpression(_ left: any Expression) -> (any Expression)? {
         if currentTokenIs(.leftParen) {
             return parseCallExpression(left)
+        }
+
+        if currentTokenIs(.leftBracket) {
+            return parseIndexExpression(left)
         }
 
         let token = currentToken
@@ -459,5 +468,29 @@ public struct Parser {
         }
 
         return list
+    }
+
+    private mutating func parseArrayLiteral() -> ArrayLiteral? {
+        let token = currentToken
+        guard let elements = parseExpressionList(.rightBracket) else {
+            return nil
+        }
+        return ArrayLiteral(token: token, elements: elements)
+    }
+
+    private mutating func parseIndexExpression(_ left: any Expression) -> IndexExpression? {
+        let token = currentToken
+
+        nextToken()
+
+        guard let index = parseExpression(.lowest) else {
+            return nil
+        }
+
+        guard expectPeek(.rightBracket) else {
+            return nil
+        }
+
+        return IndexExpression(token: token, left: left, index: index)
     }
 }
