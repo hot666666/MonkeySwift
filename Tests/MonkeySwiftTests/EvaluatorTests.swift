@@ -180,6 +180,8 @@ struct MonkeySwiftEvaluator {
                 """, "unknown operator: BOOLEAN + BOOLEAN"
             ),
             ("foobar", "identifier not found: foobar"),
+            ("{\"name\": \"Monkey\"}[fn(x) { x }];", "unusable as hash key: FUNCTION"),
+            ("{fn(x) { x }: 5};", "unusable as hash key: FUNCTION"),
         ]
 
         for (input, expectedMessage) in tests {
@@ -328,6 +330,74 @@ struct MonkeySwiftEvaluator {
             ("let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2),
             ("[1, 2, 3][3]", Null()),
             ("[1, 2, 3][-1]", Null()),
+        ]
+
+        for (input, expected) in tests {
+            let evaluated = testEval(input)
+            if let expectedInt = expected as? Int {
+                guard let integer = evaluated as? Integer else {
+                    Issue.record("Object is not Integer. got=\(type(of: evaluated))")
+                    continue
+                }
+                #expect(integer.value == expectedInt)
+            } else {
+                #expect(evaluated is Null)
+            }
+        }
+    }
+
+    @Test func testHashMapLiterals() {
+        let input = """
+        let two = "two";
+        {
+            "one": 10 - 9,
+            two: 10 + 10,
+            "three": 6 / 2,
+            4: 4,
+            true: 5,
+            false: 6
+        }
+        """
+
+        let evaluated = testEval(input)
+        guard let hashMap = evaluated as? HashMap else {
+            Issue.record("Object is not HashMap. got=\(type(of: evaluated))")
+            return
+        }
+
+        let expected: [HashKey: Int] = [
+            StringObject(value: "one").hashKey(): 1,
+            StringObject(value: "two").hashKey(): 20,
+            StringObject(value: "three").hashKey(): 3,
+            Integer(value: 4).hashKey(): 4,
+            Boolean(value: true).hashKey(): 5,
+            Boolean(value: false).hashKey(): 6
+        ]
+
+        #expect(hashMap.pairs.count == expected.count)
+
+        for (expectedKey, expectedValue) in expected {
+            guard let pair = hashMap.pairs[expectedKey] else {
+                Issue.record("no pair for expected key")
+                continue
+            }
+            guard let integerValue = pair.value as? Integer else {
+                Issue.record("value is not Integer")
+                continue
+            }
+            #expect(integerValue.value == expectedValue)
+        }
+    }
+
+    @Test func testHashMapIndexExpressions() {
+        let tests: [(String, Any)] = [
+            ("{\"foo\": 5}[\"foo\"]", 5),
+            ("{\"foo\": 5}[\"bar\"]", Null()),
+            ("let key = \"foo\"; {\"foo\": 5}[key]", 5),
+            ("{}[\"foo\"]", Null()),
+            ("{5: 5}[5]", 5),
+            ("{true: 5}[true]", 5),
+            ("{false: 5}[false]", 5),
         ]
 
         for (input, expected) in tests {

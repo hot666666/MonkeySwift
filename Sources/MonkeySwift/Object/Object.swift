@@ -15,6 +15,7 @@ public enum ObjectType: String, Sendable {
     case error = "ERROR"
     case function = "FUNCTION"
     case array = "ARRAY"
+    case hashMap = "HASHMAP"
 }
 
 // MARK: - StringObject
@@ -138,3 +139,36 @@ public struct ArrayObject: Object {
         return "[\(elems)]"
     }
 }
+
+// MARK: - HashMap
+public struct HashMap: Object {
+    public struct Pair: Sendable {
+        public let key: any Object
+        public let value: any Object
+
+        public init(key: any Object, value: any Object) {
+            self.key = key
+            self.value = value
+        }
+    }
+
+    public let pairs: [HashKey: Pair]
+
+    public init(pairs: [HashKey: Pair]) {
+        self.pairs = pairs
+    }
+
+    public var type: ObjectType { .hashMap }
+
+    public func inspect() -> String {
+        var items: [String] = []
+        for (_, pair) in pairs {
+            let keyStr = pair.key.type == .string ? "\"\(pair.key.inspect())\"" : pair.key.inspect()
+            let valueStr =
+                pair.value.type == .string ? "\"\(pair.value.inspect())\"" : pair.value.inspect()
+            items.append("\(keyStr): \(valueStr)")
+        }
+        return "{\(items.joined(separator: ", "))}"
+    }
+}
+typealias HashPair = HashMap.Pair

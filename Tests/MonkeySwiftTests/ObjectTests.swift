@@ -1,4 +1,5 @@
 import Testing
+
 @testable import MonkeySwift
 
 @Suite("ObjectTests")
@@ -176,5 +177,44 @@ struct MonkeySwiftObject {
         #expect(ObjectType.returnValue.rawValue == "RETURN_VALUE")
         #expect(ObjectType.error.rawValue == "ERROR")
         #expect(ObjectType.function.rawValue == "FUNCTION")
+        #expect(ObjectType.hashMap.rawValue == "HASHMAP")
+    }
+
+    @Test func testStringHashKey() {
+        let name1 = StringObject(value: "Hello World")
+        let name2 = StringObject(value: "Hello World")
+        let diff = StringObject(value: "My name is monkey")
+
+        #expect(name1.hashKey() == name2.hashKey())
+        #expect(name1.hashKey() != diff.hashKey())
+    }
+
+    @Test func testIntegerHashKey() {
+        let int1 = Integer(value: 5)
+        let int2 = Integer(value: 5)
+        let diff = Integer(value: 10)
+
+        #expect(int1.hashKey() == int2.hashKey())
+        #expect(int1.hashKey() != diff.hashKey())
+    }
+
+    @Test func testBooleanHashKey() {
+        let bool1 = Boolean(value: true)
+        let bool2 = Boolean(value: true)
+        let diff = Boolean(value: false)
+
+        #expect(bool1.hashKey() == bool2.hashKey())
+        #expect(bool1.hashKey() != diff.hashKey())
+    }
+
+    @Test func testHashObject() {
+        let key = StringObject(value: "name")
+        let value = StringObject(value: "monkey")
+
+        let hashPair = HashPair(key: key, value: value)
+        let hashMap = HashMap(pairs: [key.hashKey(): hashPair])
+
+        #expect(hashMap.type == .hashMap)
+        #expect(hashMap.inspect() == "{\"name\": \"monkey\"}")
     }
 }

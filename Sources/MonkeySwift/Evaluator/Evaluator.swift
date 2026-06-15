@@ -82,6 +82,9 @@ public func eval(node: Node, environment: Environment) -> any Object {
         }
         return applyFunction(function, args: args)
 
+    case let expr as HashMapLiteral:
+        return evalHashMapLiteral(expr, environment: environment)
+
     case let expr as ArrayLiteral:
         let elements = evalExpressions(expr.elements, environment: environment)
         if elements.count == 1 && isError(elements[0]) {
@@ -251,9 +254,36 @@ private func evalIdentifier(_ node: Identifier, environment: Environment) -> any
     return ErrorObject(message: "identifier not found: \(node.value)")
 }
 
+private func evalHashMapLiteral(_ node: HashMapLiteral, environment: Environment) -> any Object {
+    var pairs: [HashKey: HashPair] = [:]
+
+    for (keyExpr, valueExpr) in node.elements {
+        let key = eval(node: keyExpr, environment: environment)
+        if isError(key) {
+            return key
+        }
+
+        guard let hashableKey = key as? HashableObject else {
+            return ErrorObject(message: "unusable as hash key: \(key.type.rawValue)")
+        }
+
+        let value = eval(node: valueExpr, environment: environment)
+        if isError(value) {
+            return value
+        }
+
+        let hashed = hashableKey.hashKey()
+        pairs[hashed] = HashPair(key: key, value: value)
+    }
+
+    return HashMap(pairs: pairs)
+}
+
 private func evalIndexExpression(left: any Object, index: any Object) -> any Object {
     if left.type == .array && index.type == .integer {
         return evalArrayIndexExpression(array: left, index: index)
+    } else if left.type == .hashMap {
+        return evalHashIndexExpression(hashMap: left, index: index)
     }
     return ErrorObject(message: "index operator not supported: \(left.type.rawValue)")
 }
@@ -274,6 +304,21 @@ private func evalArrayIndexExpression(array: any Object, index: any Object) -> a
     }
 
     return arrayObject.elements[idx]
+}
+
+private func evalHashIndexExpression(hashMap: any Object, index: any Object) -> any Object {
+    guard let hashMapObject = hashMap as? HashMap else {
+        return ErrorObject(message: "not a hash map: \(hashMap.type.rawValue)")
+    }
+    guard let hashKey = index as? HashableObject else {
+        return ErrorObject(message: "unusable as hash key: \(index.type.rawValue)")
+    }
+
+    let key = hashKey.hashKey()
+    guard let pair = hashMapObject.pairs[key] else {
+        return NULL
+    }
+    return pair.value
 }
 
 // MARK: - Function Evaluation
