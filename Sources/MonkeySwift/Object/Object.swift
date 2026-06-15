@@ -8,12 +8,28 @@ public protocol Object: Sendable {
 // MARK: - Object Type
 public enum ObjectType: String, Sendable {
     case integer = "INTEGER"
+    case string = "STRING"
     case boolean = "BOOLEAN"
     case null = "NULL"
     case returnValue = "RETURN_VALUE"
     case error = "ERROR"
     case function = "FUNCTION"
     case array = "ARRAY"
+}
+
+// MARK: - StringObject
+public struct StringObject: Object {
+    public let value: String
+
+    public init(value: String) {
+        self.value = value
+    }
+
+    public var type: ObjectType { .string }
+
+    public func inspect() -> String {
+        return value
+    }
 }
 
 // MARK: - Integer

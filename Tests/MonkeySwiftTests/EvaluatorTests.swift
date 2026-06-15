@@ -74,6 +74,19 @@ struct MonkeySwiftEvaluator {
         }
     }
 
+    @Test func testStringLiteral() {
+        let input = "\"Hello, world!\""
+        let expected = "Hello, world!"
+
+        let evaluated = testEval(input)
+        guard let string = evaluated as? StringObject else {
+            Issue.record("Object is not StringObject. got=\(type(of: evaluated))")
+            return
+        }
+
+        #expect(string.value == expected, "Expected \(expected), got \(string.value)")
+    }
+
     @Test func testBangOperator() {
         let tests: [(String, Bool)] = [
             ("!true", false),

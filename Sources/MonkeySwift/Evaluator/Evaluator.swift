@@ -38,6 +38,9 @@ public func eval(node: Node, environment: Environment) -> any Object {
     case let expr as IntegerLiteral:
         return Integer(value: expr.value)
 
+    case let expr as StringLiteral:
+        return StringObject(value: expr.value)
+
     case let expr as BooleanLiteral:
         return nativeBoolToBooleanObject(expr.value)
 
