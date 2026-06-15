@@ -27,28 +27,43 @@ struct MonkeySwiftLexer {
 			10 != 9;
 			"foobar"
 			"foo bar"
+			{a: 1, b: 2}
 			"""
 
 		let expectedTokens: [TokenType] = [
 			.let, .identifier(name: "five"), .assign, .int(value: 5), .semicolon,
+
 			.let, .identifier(name: "ten"), .assign, .int(value: 10), .semicolon,
+
 			.let, .identifier(name: "add"), .assign, .function, .leftParen,
 			.identifier(name: "x"), .comma, .identifier(name: "y"), .rightParen, .leftBrace,
 			.identifier(name: "x"), .plus, .identifier(name: "y"), .semicolon,
 			.rightBrace, .semicolon,
+
 			.let, .identifier(name: "result"), .assign, .identifier(name: "add"), .leftParen,
+
 			.identifier(name: "five"), .comma, .identifier(name: "ten"), .rightParen, .semicolon,
+
 			.bang, .minus, .slash, .asterisk, .int(value: 5), .semicolon,
+
 			.int(value: 5), .lessThan, .int(value: 10), .greaterThan, .int(value: 5), .semicolon,
 			.if, .leftParen, .int(value: 5), .lessThan, .int(value: 10), .rightParen, .leftBrace,
 			.return, .true, .semicolon,
 			.rightBrace, .else, .leftBrace,
 			.return, .false, .semicolon,
 			.rightBrace,
+
 			.int(value: 10), .equal, .int(value: 10), .semicolon,
+
 			.int(value: 10), .notEqual, .int(value: 9), .semicolon,
+
 			.string(value: "foobar"),
+
 			.string(value: "foo bar"),
+
+			.leftBrace, .identifier(name: "a"), .colon, .int(value: 1), .comma,
+			.identifier(name: "b"), .colon, .int(value: 2), .rightBrace,
+
 			.eof,
 		]
 

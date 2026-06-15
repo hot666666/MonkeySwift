@@ -47,6 +47,8 @@ public struct Lexer: Sendable {
             tokenType = .comma
         case TokenSymbol.semicolon.rawValue:
             tokenType = .semicolon
+        case TokenSymbol.colon.rawValue:
+            tokenType = .colon
         case TokenSymbol.lessThan.rawValue:
             tokenType = .lessThan
         case TokenSymbol.greaterThan.rawValue:
