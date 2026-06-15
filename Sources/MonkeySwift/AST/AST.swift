@@ -101,6 +101,46 @@ public struct BlockStatement: Statement, Sendable {
 
 // MARK: - Expressions
 
+public struct PrefixExpression: Expression, Sendable {
+    public let token: TokenType  // prefix operator token
+    public let operatorSymbol: String
+    public let right: any Expression
+
+    public init(token: TokenType, operatorSymbol: String, right: any Expression) {
+        self.token = token
+        self.operatorSymbol = operatorSymbol
+        self.right = right
+    }
+
+    public var tokenLiteral: String { token.literal }
+
+    public func string() -> String {
+        return "(\(operatorSymbol)\(right.string()))"
+    }
+}
+
+public struct InfixExpression: Expression, Sendable {
+    public let token: TokenType  // operator token
+    public let left: any Expression
+    public let operatorSymbol: String
+    public let right: any Expression
+
+    public init(
+        token: TokenType, left: any Expression, operatorSymbol: String, right: any Expression
+    ) {
+        self.token = token
+        self.left = left
+        self.operatorSymbol = operatorSymbol
+        self.right = right
+    }
+
+    public var tokenLiteral: String { token.literal }
+
+    public func string() -> String {
+        return "(\(left.string()) \(operatorSymbol) \(right.string()))"
+    }
+}
+
 public struct Identifier: Expression, Sendable {
     public let token: TokenType  // .identifier token
     public let value: String
@@ -162,46 +202,6 @@ public struct BooleanLiteral: Expression, Sendable {
 
     public func string() -> String {
         return "\(value)"
-    }
-}
-
-public struct PrefixExpression: Expression, Sendable {
-    public let token: TokenType  // prefix operator token
-    public let operatorSymbol: String
-    public let right: any Expression
-
-    public init(token: TokenType, operatorSymbol: String, right: any Expression) {
-        self.token = token
-        self.operatorSymbol = operatorSymbol
-        self.right = right
-    }
-
-    public var tokenLiteral: String { token.literal }
-
-    public func string() -> String {
-        return "(\(operatorSymbol)\(right.string()))"
-    }
-}
-
-public struct InfixExpression: Expression, Sendable {
-    public let token: TokenType  // operator token
-    public let left: any Expression
-    public let operatorSymbol: String
-    public let right: any Expression
-
-    public init(
-        token: TokenType, left: any Expression, operatorSymbol: String, right: any Expression
-    ) {
-        self.token = token
-        self.left = left
-        self.operatorSymbol = operatorSymbol
-        self.right = right
-    }
-
-    public var tokenLiteral: String { token.literal }
-
-    public func string() -> String {
-        return "(\(left.string()) \(operatorSymbol) \(right.string()))"
     }
 }
 
@@ -284,6 +284,23 @@ public struct ArrayLiteral: Expression, Sendable {
     public func string() -> String {
         let elems = elements.map { $0.string() }.joined(separator: ", ")
         return "[\(elems)]"
+    }
+}
+
+public struct HashMapLiteral: Expression, Sendable {
+    public let token: TokenType  // '{' token
+    public let elements: [(any Expression, any Expression)]
+
+    public init(token: TokenType, elements: [(any Expression, any Expression)]) {
+        self.token = token
+        self.elements = elements
+    }
+
+    public var tokenLiteral: String { token.literal }
+
+    public func string() -> String {
+        let elems = elements.map { "\($0.string()): \($1.string())" }.joined(separator: ", ")
+        return "{\(elems)}"
     }
 }
 

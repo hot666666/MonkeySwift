@@ -267,6 +267,8 @@ public struct Parser {
             return parsePrefixOperatorExpression()
         case .leftParen:
             return parseGroupedExpression()
+        case .leftBrace:
+            return parseHashMapLiteral()
         case .if:
             return parseIfExpression()
         case .function:
@@ -470,6 +472,47 @@ public struct Parser {
         }
 
         return list
+    }
+
+    private mutating func parseHashMapItems() -> [(any Expression, any Expression)]? {
+        var items: [(any Expression, any Expression)] = []
+
+        if peekTokenIs(.rightBrace) {
+            nextToken()
+            return items
+        }
+
+        nextToken()
+
+        while true {
+            guard let keyExpression = parseExpression(.lowest),
+                peekTokenIs(.colon)
+            else { return nil }
+
+            nextToken()
+            nextToken()
+
+            guard let valueExpression = parseExpression(.lowest) else { return nil }
+
+            items.append((keyExpression, valueExpression))
+
+            guard peekTokenIs(.comma) else { break }
+
+            nextToken()
+            nextToken()
+        }
+
+        guard expectPeek(.rightBrace) else { return nil }
+
+        return items
+    }
+
+    private mutating func parseHashMapLiteral() -> HashMapLiteral? {
+        let token = currentToken
+        guard let elements = parseHashMapItems() else {
+            return nil
+        }
+        return HashMapLiteral(token: token, elements: elements)
     }
 
     private mutating func parseArrayLiteral() -> ArrayLiteral? {

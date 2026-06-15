@@ -497,6 +497,32 @@ struct MonkeySwiftParser {
         #expect(program.string() == "let myVar = anotherVar;")
     }
 
+    @Test func testHashMapLiteral() {
+        let input = "{1: 2, \"key\": 1 + 2};"
+
+        let (program, errors) = parseProgram(input)
+        checkParserErrors(errors)
+
+        guard let stmt = program.statements[0] as? ExpressionStatement else {
+            Issue.record("Statement is not ExpressionStatement")
+            return
+        }
+
+        guard let hashMap = stmt.expression as? HashMapLiteral else {
+            Issue.record("Expression is not HashMapLiteral")
+            return
+        }
+        #expect(hashMap.elements.count == 2)
+
+        let idx1 = hashMap.elements[1]
+        guard let key = idx1.0 as? StringLiteral, let value = idx1.1 as? InfixExpression else {
+            Issue.record("Second element is not StringLiteral: InfixExpression")
+            return
+        }
+        #expect(key.value == "key")
+        #expect(value.operatorSymbol == "+")
+    }
+
     @Test func testArrayLiteral() {
         let input = "[1, 2 * 2, 3 + 3]"
 
