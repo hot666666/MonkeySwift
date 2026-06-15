@@ -117,10 +117,10 @@ public enum TokenType: Equatable, Sendable {
         self = .int(value: value ?? 0)
     }
 
-    // String -> TokenKeyword
-    public init(identifier: String) {
-        guard let keyword = TokenKeyword(rawValue: identifier) else {
-            self = .identifier(name: identifier)
+    // String -> Identifier or TokenKeyword
+    public init(word: String) {
+        guard let keyword = TokenKeyword(rawValue: word) else {
+            self = .identifier(name: word)
             return
         }
 
