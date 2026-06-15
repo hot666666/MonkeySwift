@@ -65,7 +65,12 @@ Goodbye!
 - [x] **불린 연산**: 논리 연산자 지원
 - [x] **조건문**: if-else 표현식
 - [x] **배열**: 배열 리터럴 및 인덱스 접근 지원
+- [ ] **String**
+- [ ] **Builtin Function** - len, first, last, rest(pop), puts
+- [ ] **HashMap**
 - [ ] VM 구현
+
+- [ ] REPL 개행구분처리
 
 ### MonkeySwift는 전통적인 인터프리터 파이프라인을 따릅니다:
 
@@ -75,12 +80,6 @@ graph LR
     B -->|Parser| C[AST]
     C -->|Evaluator| D[실행 결과]
     D -->|REPL| E[사용자 출력]
-
-    style A fill:#e1f5ff
-    style B fill:#fff4e1
-    style C fill:#ffe1f5
-    style D fill:#e1ffe1
-    style E fill:#f5e1ff
 ```
 
 ## 언어 기능
@@ -143,7 +142,6 @@ add(5, 10);      // 15
 
 ### 7. 고차 함수
 
-
 ```monkey
 let twice = fn(f, x) {
     f(f(x))
@@ -185,17 +183,17 @@ arr[777];          // nil
 ```mermaid
 graph TD
     Start["parseExpression(precedence) 호출"] --> Prefix["leftExp = parsePrefixExpression()"]
-    
+
     Prefix --> PreCheck{{"!peekTokenIs(.semicolon) && <br/>precedence < peekPrecedence()"}}
-    
+
     PreCheck -->|False| Return["leftExp 반환"]
     PreCheck -->|True| InfixCheck{"isInfixToken(peekToken) ?"}
-    
+
     InfixCheck -->|False| Return
     InfixCheck -->|True| Consume["nextToken()"]
-    
+
     Consume --> InfixLogic
-    
+
     subgraph "parseInfixExpression 내부"
     InfixLogic["right = parseExpression(currentPrecedence)"]
     InfixLogic --> Combine["infixExp = InfixExpression(left, op, right)"]
@@ -205,12 +203,6 @@ graph TD
     IsNil -->|Yes| Return
     IsNil -->|No| Update["leftExp = infixExp"]
     Update --> PreCheck
-
-    style Start fill:#4a90e2,stroke:#1f4e79,stroke-width:1px,color:#fff
-    style Return fill:#50c878,stroke:#1d6b3a,stroke-width:1px,color:#fff
-    style PreCheck fill:#e74c3c,stroke:#7a1f18,stroke-width:1px,color:#fff
-    style InfixLogic fill:#9b59b6,stroke:#4c2a63,stroke-width:1px,color:#fff
-    style InfixCheck fill:#f1c40f,stroke:#7d6608,stroke-width:1px,color:#111
 ```
 
 ## 주요 구성요소
@@ -246,30 +238,28 @@ protocol Expression: Node {}
 
 #### 1. 기본 값 (Literals)
 
-| 타입             | 예시                 | 코드구조 (Struct)        | 설명             |
-|------------------|----------------------|---------------------------|------------------|
-| Identifier       | x, myVar             | token, value: String      | 변수 이름 식별자 |
-| IntegerLiteral   | 5, 100               | token, value: Int         | 정수 숫자        |
-| BooleanLiteral   | true, false          | token, value: Bool        | 참/거짓 값       |
-| ArrayLiteral     | [1, 2], []           | token, elements: [Expr]   | 배열 리터럴      |
-
+| 타입           | 예시        | 코드구조 (Struct)       | 설명             |
+| -------------- | ----------- | ----------------------- | ---------------- |
+| Identifier     | x, myVar    | token, value: String    | 변수 이름 식별자 |
+| IntegerLiteral | 5, 100      | token, value: Int       | 정수 숫자        |
+| BooleanLiteral | true, false | token, value: Bool      | 참/거짓 값       |
+| ArrayLiteral   | [1, 2], []  | token, elements: [Expr] | 배열 리터럴      |
 
 #### 2. 연산자 식 (Operator Expressions)
 
-| 타입              | 예시               | 코드구조 (Struct)                            | 설명                              |
-|-------------------|--------------------|----------------------------------------------|-----------------------------------|
-| PrefixExpression  | -5, !true          | token, operatorSymbol, right: Expression     | 전위 연산자 + 식 (오른쪽 항 하나) |
-| InfixExpression   | 5 + 5, x == y      | token, left, operatorSymbol, right           | 식 + 중위 연산자 + 식 (양쪽 항)   |
-| IndexExpression   | arr[0]             | token, left, index                           | 배열 인덱스 접근 (좌항[인덱스])   |
-
+| 타입             | 예시          | 코드구조 (Struct)                        | 설명                              |
+| ---------------- | ------------- | ---------------------------------------- | --------------------------------- |
+| PrefixExpression | -5, !true     | token, operatorSymbol, right: Expression | 전위 연산자 + 식 (오른쪽 항 하나) |
+| InfixExpression  | 5 + 5, x == y | token, left, operatorSymbol, right       | 식 + 중위 연산자 + 식 (양쪽 항)   |
+| IndexExpression  | arr[0]        | token, left, index                       | 배열 인덱스 접근 (좌항[인덱스])   |
 
 #### 3. 제어 흐름 및 함수 (Control Flow & Functions)
 
-| 타입             | 예시                              | 코드구조 (Struct)                                        | 설명                               |
-|------------------|-----------------------------------|----------------------------------------------------------|------------------------------------|
-| IfExpression     | if (x < y) { x } else { y }      | token, condition, consequence, alternative?              | 조건문 (monkey에선 값을 반환하는 식) |
-| FunctionLiteral  | fn(x, y) { x + y }               | token, parameters: [Identifier], body                    | 함수 정의 (파라미터 목록 + 바디)    |
-| CallExpression   | add(1, 2)                        | token, function, arguments: [Expression]                 | 함수 호출 (함수 식 + 인자 목록)
+| 타입            | 예시                        | 코드구조 (Struct)                           | 설명                                 |
+| --------------- | --------------------------- | ------------------------------------------- | ------------------------------------ |
+| IfExpression    | if (x < y) { x } else { y } | token, condition, consequence, alternative? | 조건문 (monkey에선 값을 반환하는 식) |
+| FunctionLiteral | fn(x, y) { x + y }          | token, parameters: [Identifier], body       | 함수 정의 (파라미터 목록 + 바디)     |
+| CallExpression  | add(1, 2)                   | token, function, arguments: [Expression]    | 함수 호출 (함수 식 + 인자 목록)      |
 
 ### Object System
 
