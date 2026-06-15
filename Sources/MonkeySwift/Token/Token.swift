@@ -36,6 +36,7 @@ public enum TokenType: Equatable, Sendable {
     // Identifiers + literals
     case identifier(name: String)
     case int(value: Int)
+    case string(value: String)
 
     // Operators
     case assign, plus, minus, bang, asterisk, slash, comma, semicolon, lessThan, greaterThan, equal,
@@ -52,6 +53,7 @@ public enum TokenType: Equatable, Sendable {
         case .eof: return "EOF"
         case .identifier(let name): return name
         case .int(let value): return "\(value)"
+        case .string(let value): return value
         case .assign: return String(TokenSymbol.equal.rawValue)
         case .plus: return String(TokenSymbol.plus.rawValue)
         case .minus: return String(TokenSymbol.minus.rawValue)
@@ -131,5 +133,10 @@ public enum TokenType: Equatable, Sendable {
         case .else: self = .else
         case .return: self = .return
         }
+    }
+
+    // String -> String
+    public init(string: String) {
+        self = .string(value: string)
     }
 }

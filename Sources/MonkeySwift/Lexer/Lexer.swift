@@ -63,6 +63,8 @@ public struct Lexer: Sendable {
             tokenType = .leftBracket
         case TokenSymbol.rightBracket.rawValue:
             tokenType = .rightBracket
+        case let character? where isString(character):
+            return TokenType(string: readString())
         case let character? where isLetter(character):
             return TokenType(identifier: readIdentifier())
         case let character? where isDigit(character):
@@ -99,6 +101,26 @@ public struct Lexer: Sendable {
         return String(input[startIndex..<endIndex])
     }
 
+    private mutating func readString() -> String {
+        // \" + ~ + \"
+        setNextCharacter()
+        defer { setNextCharacter() }
+
+        let position = currentPosition
+
+        while true {
+            setNextCharacter()
+
+            guard let character, character != "\"" else {
+                break
+            }
+        }
+
+        let startIndex = input.index(input.startIndex, offsetBy: position)
+        let endIndex = input.index(startIndex, offsetBy: currentPosition - position)
+        return String(input[startIndex..<endIndex])
+    }
+
     private mutating func readIdentifier() -> String {
         return readCharacter(while: isLetterOrDigit)
     }
@@ -119,6 +141,10 @@ public struct Lexer: Sendable {
         while character == " " || character == "\t" || character == "\n" || character == "\r" {
             setNextCharacter()
         }
+    }
+
+    private func isString(_ character: Character) -> Bool {
+        return character == "\""
     }
 
     private func isLetter(_ character: Character) -> Bool {

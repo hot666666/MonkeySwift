@@ -25,6 +25,8 @@ struct MonkeySwiftLexer {
 
 			10 == 10;
 			10 != 9;
+			"foobar"
+			"foo bar"
 			"""
 
 		let expectedTokens: [TokenType] = [
@@ -45,6 +47,8 @@ struct MonkeySwiftLexer {
 			.rightBrace,
 			.int(value: 10), .equal, .int(value: 10), .semicolon,
 			.int(value: 10), .notEqual, .int(value: 9), .semicolon,
+			.string(value: "foobar"),
+			.string(value: "foo bar"),
 			.eof,
 		]
 
@@ -56,6 +60,14 @@ struct MonkeySwiftLexer {
 				token == expected,
 				"Token \(index): expected \(expected.literal), got \(token.literal)")
 		}
+	}
+
+	@Test func testLexerString() async throws {
+		let input = "\"Hello, world!\""
+		var lexer = Lexer(input: input)
+
+		#expect(lexer.nextTokenType() == .string(value: "Hello, world!"))
+		#expect(lexer.nextTokenType() == .eof)
 	}
 
 	@Test func testLexerNumbers() async throws {
