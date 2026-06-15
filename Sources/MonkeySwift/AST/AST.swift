@@ -117,6 +117,22 @@ public struct Identifier: Expression, Sendable {
     }
 }
 
+public struct StringLiteral: Expression, Sendable {
+    public let token: TokenType  // .string token
+    public let value: String
+
+    public init(token: TokenType, value: String) {
+        self.token = token
+        self.value = value
+    }
+
+    public var tokenLiteral: String { token.literal }
+
+    public func string() -> String {
+        return value
+    }
+}
+
 public struct IntegerLiteral: Expression, Sendable {
     public let token: TokenType  // .int token
     public let value: Int

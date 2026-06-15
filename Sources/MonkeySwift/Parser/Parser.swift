@@ -257,6 +257,8 @@ public struct Parser {
             return Identifier(token: currentToken, value: name)
         case .int(let value):
             return IntegerLiteral(token: currentToken, value: value)
+        case .string(let value):
+            return StringLiteral(token: currentToken, value: value)
         case .true:
             return BooleanLiteral(token: currentToken, value: true)
         case .false:

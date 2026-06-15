@@ -115,6 +115,28 @@ struct MonkeySwiftParser {
         #expect(literal.tokenLiteral == "5")
     }
 
+    @Test func testStringLiteralExpression() {
+        let input = "\"hello world\";"
+
+        let (program, errors) = parseProgram(input)
+        checkParserErrors(errors)
+
+        #expect(program.statements.count == 1)
+
+        guard let stmt = program.statements[0] as? ExpressionStatement else {
+            Issue.record("Statement is not ExpressionStatement")
+            return
+        }
+
+        guard let literal = stmt.expression as? StringLiteral else {
+            Issue.record("Expression is not StringLiteral")
+            return
+        }
+
+        #expect(literal.value == "hello world")
+        #expect(literal.tokenLiteral == "hello world")
+    }
+
     @Test func testBooleanExpression() {
         let tests: [(String, Bool)] = [
             ("true;", true),
