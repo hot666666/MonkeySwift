@@ -4,6 +4,8 @@
 
 Monkey 언어 인터프리터입니다. "Writing An Interpreter In Go" 책을 기반으로 Swift로 재구현했습니다.
 
+<img src="image.png" alt="Phase" width="400">
+
 ## 목차
 
 - [빌드 및 실행](#빌드-및-실행)
@@ -67,10 +69,8 @@ Goodbye!
 - [x] **배열**: 배열 리터럴 및 인덱스 접근 지원
 - [x] **문자열**: 문자열 리터럴 지원
 - [x] **HashMap**: 딕셔너리 리터럴 및 인덱스 접근 지원
-- [ ] **Builtin Function** - len, first, last, rest(pop), puts
+- [x] **Builtin Function** - len, first, last, push, rest(pop), puts
 - [ ] VM 구현
-
-- [ ] REPL 개행구분처리
 
 ### MonkeySwift는 전통적인 인터프리터 파이프라인을 따릅니다:
 
