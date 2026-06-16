@@ -66,8 +66,8 @@ Goodbye!
 - [x] **조건문**: if-else 표현식
 - [x] **배열**: 배열 리터럴 및 인덱스 접근 지원
 - [x] **문자열**: 문자열 리터럴 지원
+- [x] **HashMap**: 딕셔너리 리터럴 및 인덱스 접근 지원
 - [ ] **Builtin Function** - len, first, last, rest(pop), puts
-- [ ] **HashMap**
 - [ ] VM 구현
 
 - [ ] REPL 개행구분처리
@@ -181,6 +181,16 @@ hello;             // Hello, world!
 let arr = [1, 2, 3];
 arr[0];            // 1
 arr[777];          // nil
+```
+
+### 11. HashMap
+
+```monkey
+let dict = {"name": "Monkey", true: 10};
+
+dict["name"];      // Monkey
+dict[true];        // 10
+dict["bar"];       // nil
 ```
 
 ## 주요 흐름
