@@ -16,6 +16,7 @@ public enum ObjectType: String, Sendable {
     case function = "FUNCTION"
     case array = "ARRAY"
     case hashMap = "HASHMAP"
+    case builtin = "BUILTIN"
 }
 
 // MARK: - StringObject

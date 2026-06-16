@@ -413,4 +413,31 @@ struct MonkeySwiftEvaluator {
             }
         }
     }
+
+    @Test func testBuiltinFunctions() {
+        let tests: [(String, Any)] = [
+            ("len(\"\")", 0),
+            ("len(\"four\")", 4),
+            ("len(\"hello world\")", 11),
+            ("len(1)", "argument to `len` not supported, got INTEGER"),
+            ("len(\"one\", \"two\")", "wrong number of arguments. got=2, want=1"),
+        ]
+
+        for (input, expected) in tests {
+            let evaluated = testEval(input)
+            if let expectedInt = expected as? Int {
+                guard let integer = evaluated as? Integer else {
+                    Issue.record("Object is not Integer. got=\(type(of: evaluated))")
+                    continue
+                }
+                #expect(integer.value == expectedInt)
+            } else if let expectedString = expected as? String {
+                guard let err = evaluated as? ErrorObject else {
+                    Issue.record("Object is not Error. got=\(type(of: evaluated))")
+                    continue
+                }
+                #expect(err.message == expectedString)
+            }
+        }
+    }
 }

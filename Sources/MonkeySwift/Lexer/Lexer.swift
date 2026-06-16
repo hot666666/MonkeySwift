@@ -107,18 +107,14 @@ public struct Lexer: Sendable {
     }
 
     private mutating func readString() -> String {
-        // 시작과 끝 "\""" 제거
+        // 시작과 끝 "\"" 제거
         setNextCharacter()
         defer { setNextCharacter() }
 
         let position = currentPosition
 
-        while true {
+        while let character = self.character, character != "\"" {
             setNextCharacter()
-
-            guard let character, character != "\"" else {
-                break
-            }
         }
 
         let startIndex = input.index(input.startIndex, offsetBy: position)

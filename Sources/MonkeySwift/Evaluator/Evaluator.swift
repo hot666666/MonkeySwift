@@ -251,6 +251,11 @@ private func evalIdentifier(_ node: Identifier, environment: Environment) -> any
     if let value = environment.get(node.value) {
         return value
     }
+    
+    if let builtin = builtins[node.value] {
+        return builtin
+    }
+    
     return ErrorObject(message: "identifier not found: \(node.value)")
 }
 
@@ -339,13 +344,17 @@ private func evalExpressions(_ expressions: [any Expression], environment: Envir
 }
 
 private func applyFunction(_ function: any Object, args: [any Object]) -> any Object {
-    guard let fn = function as? Function else {
-        return ErrorObject(message: "not a function: \(function.type.rawValue)")
+    if let fn = function as? Function {
+        let extendedEnv = extendFunctionEnv(fn, args: args)
+        let evaluated = eval(node: fn.body, environment: extendedEnv)
+        return unwrapReturnValue(evaluated)
+    }
+    
+    if let builtin = function as? Builtin {
+        return builtin.fn(args)
     }
 
-    let extendedEnv = extendFunctionEnv(fn, args: args)
-    let evaluated = eval(node: fn.body, environment: extendedEnv)
-    return unwrapReturnValue(evaluated)
+    return ErrorObject(message: "not a function: \(function.type.rawValue)")
 }
 
 private func extendFunctionEnv(_ function: Function, args: [any Object]) -> Environment {
