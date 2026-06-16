@@ -1,10 +1,10 @@
 # MonkeySwift 🐵
 
-**Monkey 프로그래밍 언어의 Swift 구현체**
+## Monkey 프로그래밍 언어의 Swift 구현체
 
-Monkey 언어 인터프리터입니다. "Writing An Interpreter In Go" 책을 기반으로 Swift로 재구현했습니다.
+**[Writing An Interpreter In Go](https://interpreterbook.com/)** 책 내용을 기반으로 Swift로 구현되었습니다.
 
-<img src="image.png" alt="Phase" width="400">
+<img src="Asset/image.png" alt="Demo" width="720">
 
 ## 목차
 
@@ -63,13 +63,12 @@ Goodbye!
 - [x] **파싱 (Parsing)**: Pratt Parsing을 사용한 AST 생성
 - [x] **평가 (Evaluation)**: Tree-walking 방식으로 AST 실행
 - [x] **일급 함수 (First-class Functions)**: 함수를 값으로 취급
-- [x] **정수 연산**: 사칙연산, 비교 연산
-- [x] **불린 연산**: 논리 연산자 지원
-- [x] **조건문**: if-else 표현식
-- [x] **배열**: 배열 리터럴 및 인덱스 접근 지원
-- [x] **문자열**: 문자열 리터럴 지원
-- [x] **HashMap**: 딕셔너리 리터럴 및 인덱스 접근 지원
-- [x] **Builtin Function** - len, first, last, push, rest(pop), puts
+- [x] **연산 (Operations)**: 사칙, 비교, 논리 연산 지원
+- [x] **조건문 (Control Flow)**: if-else 표현식
+- [x] **배열 (Array)**: 배열 리터럴 및 인덱스 접근 지원
+- [x] **문자열 (String)**: 문자열 리터럴 지원
+- [x] **해시맵 (HashMap)**: 딕셔너리 리터럴 및 인덱스 접근 지원
+- [x] **빌트인 함수 (Builtin Functions)**: len, first, last, push, rest(pop), puts 지원
 - [ ] VM 구현
 
 ### MonkeySwift는 전통적인 인터프리터 파이프라인을 따릅니다:
@@ -193,6 +192,20 @@ dict[true];        // 10
 dict["bar"];       // nil
 ```
 
+### 12. 내장 함수 (Builtin Functions)
+
+```monkey
+len("hello");     // 5
+len([1, 2, 3]);   // 3
+
+first([1, 2, 3]); // 1
+last([1, 2, 3]);  // 3
+rest([1, 2, 3]);  // [2, 3]
+push([1, 2], 3);  // [1, 2, 3]
+
+puts("Hello");    // 콘솔에 "Hello" 출력
+```
+
 ## 주요 흐름
 
 ### Pratt Parsing(Expression Statement 부분)
@@ -231,6 +244,8 @@ MonkeySwift는 각 단계마다 **입력 구조**와 **변환 결과**가 1:1에
 | **렉싱 (Lexing)**     | 소스 코드 (`Lexer`)    | ➡️  | 토큰 스트림 (`TokenType`)   |
 | **파싱 (Parsing)**    | 토큰 스트림 (`Parser`) | ➡️  | 추상 구문 트리 (`AST Node`) |
 | **평가 (Evaluation)** | AST (`Evaluator`)      | ➡️  | 런타임 값 (`Object`)        |
+
+<img src="Asset/phase.png" alt="Phase" width="480">
 
 ---
 
@@ -360,7 +375,3 @@ public class Environment {
     - **`ErrorObject`**: 런타임 오류 및 추적 메시지를 저장하는 에러 객체
   - **함수 및 클로저 (Function & Closure)**
     - **`Function`**: 매개변수 정보, 수행할 바디 식, 선언 시점 스코프 환경을 캡슐화한 일급 객체
-
-## 참고
-
-- 📖 [Writing An Interpreter In Go](https://interpreterbook.com/) - Thorsten Ball
