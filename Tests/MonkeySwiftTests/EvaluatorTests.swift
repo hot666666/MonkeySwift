@@ -440,4 +440,51 @@ struct MonkeySwiftEvaluator {
             }
         }
     }
+
+    @Test func testArrayBuiltinFunctions() {
+        let tests: [(String, Any)] = [
+            ("len([1, 2, 3])", 3),
+            ("len([])", 0),
+            ("puts(\"hello\", \"world!\")", Null()),
+            ("first([1, 2, 3])", 1),
+            ("first([])", Null()),
+            ("first(1)", "argument to `first` must be ARRAY, got INTEGER"),
+            ("last([1, 2, 3])", 3),
+            ("last([])", Null()),
+            ("last(1)", "argument to `last` must be ARRAY, got INTEGER"),
+            ("rest([1, 2, 3])", [2, 3]),
+            ("rest([])", Null()),
+            ("push([], 1)", [1]),
+            ("push(1, 1)", "argument to `push` must be ARRAY, got INTEGER"),
+        ]
+
+        for (input, expected) in tests {
+            let evaluated = testEval(input)
+            if let expectedInt = expected as? Int {
+                guard let integer = evaluated as? Integer else {
+                    Issue.record("Object is not Integer. got=\(type(of: evaluated)) for input \(input)")
+                    continue
+                }
+                #expect(integer.value == expectedInt)
+            } else if let expectedString = expected as? String {
+                guard let err = evaluated as? ErrorObject else {
+                    Issue.record("Object is not Error. got=\(type(of: evaluated)) for input \(input)")
+                    continue
+                }
+                #expect(err.message == expectedString)
+            } else if let expectedArray = expected as? [Int] {
+                guard let array = evaluated as? ArrayObject else {
+                    Issue.record("Object is not ArrayObject. got=\(type(of: evaluated)) for input \(input)")
+                    continue
+                }
+                #expect(array.elements.count == expectedArray.count)
+                for (i, expectedElem) in expectedArray.enumerated() {
+                    let actualElem = array.elements[i] as? Integer
+                    #expect(actualElem?.value == expectedElem)
+                }
+            } else if expected is Null {
+                #expect(evaluated is Null)
+            }
+        }
+    }
 }
