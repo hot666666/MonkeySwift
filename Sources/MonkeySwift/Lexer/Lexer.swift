@@ -1,21 +1,22 @@
-typealias Position = Int
-
 // MARK: - Lexer
 /// Lexer는 입력된 문자열을 토큰으로 변환하는 역할을 합니다.
 /// - input: 입력된 문자열
-/// - currentPosition: 현재 위치 / character: 현재 위치의 문자
-/// - readPosition: 읽은 위치
+/// - currentIndex: 현재 위치 / character: 현재 위치의 문자
+/// - readIndex: 다음 읽을 위치
 public struct Lexer: Sendable {
     let input: String
-    var currentPosition: Position = 0
+    var currentIndex: String.Index
     var character: Character?
-    var readPosition: Position = 0
+    var readIndex: String.Index
 
     public init(input: String) {
         self.input = input
+        self.currentIndex = input.startIndex
+        self.character = nil
+        self.readIndex = input.startIndex
         /// Lexer 상태 세팅
-        /// - character = input[currentPosition]
-        /// - [currentPosition:0, readPosition:0] -> [currentPosition:0, readPosition:1]
+        /// - character = input[currentIndex]
+        /// - readIndex는 다음 문자 위치로 이동
         self.setNextCharacter()
     }
 
@@ -85,41 +86,39 @@ public struct Lexer: Sendable {
     }
 
     private mutating func setNextCharacter() {
-        if readPosition < input.count {
-            let index = input.index(input.startIndex, offsetBy: readPosition)
-            character = input[index]
-        } else {
+        guard readIndex < input.endIndex else {
+            currentIndex = readIndex
             character = nil
+            return
         }
-        currentPosition = readPosition
-        readPosition += 1
+
+        currentIndex = readIndex
+        character = input[readIndex]
+        readIndex = input.index(after: readIndex)
     }
 
     private mutating func readCharacter(while condition: ((Character) -> Bool)) -> String {
-        let position = currentPosition
+        let startIndex = currentIndex
 
         while let character = self.character, condition(character) {
             setNextCharacter()
         }
-        let startIndex = input.index(input.startIndex, offsetBy: position)
-        let endIndex = input.index(startIndex, offsetBy: currentPosition - position)
-        return String(input[startIndex..<endIndex])
+
+        return String(input[startIndex..<currentIndex])
     }
 
     private mutating func readString() -> String {
         // 시작과 끝 "\"" 제거
         setNextCharacter()
-        defer { setNextCharacter() }
-
-        let position = currentPosition
+        let startIndex = currentIndex
 
         while let character = self.character, character != "\"" {
             setNextCharacter()
         }
 
-        let startIndex = input.index(input.startIndex, offsetBy: position)
-        let endIndex = input.index(startIndex, offsetBy: currentPosition - position)
-        return String(input[startIndex..<endIndex])
+        let string = String(input[startIndex..<currentIndex])
+        setNextCharacter()
+        return string
     }
 
     private mutating func readWord() -> String {
@@ -131,11 +130,11 @@ public struct Lexer: Sendable {
     }
 
     private func peekCharacter() -> Character? {
-        guard readPosition < input.count else {
+        guard readIndex < input.endIndex else {
             return nil
         }
-        let index = input.index(input.startIndex, offsetBy: readPosition)
-        return input[index]
+
+        return input[readIndex]
     }
 
     private mutating func skipWhitespace() {
